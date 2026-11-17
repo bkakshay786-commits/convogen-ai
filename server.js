@@ -35,15 +35,6 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 if (NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }
-
-// Hosted platforms terminate HTTPS at a proxy and forward
-// plain HTTP to the app. Trusting one proxy hop keeps
-// secure cookies and client IPs correct there. Local
-// runs never set NODE_ENV=production, so they are
-// unaffected.
-if (NODE_ENV === "production") {
-  app.set("trust proxy", 1);
-}
 const PUBLIC_DIR = path.join(__dirname, "public");
 
 const MAX_FILES = 5;
@@ -5738,7 +5729,7 @@ const server = app.listen(PORT, () => {
   console.log("======================================");
   console.log(`Environment: ${NODE_ENV}`);
   console.log(`Server:      http://localhost:${PORT}`);
-  console.log("Build tag:   deploy-1");
+  console.log("Build tag:   mobile-2");
   console.log("OCR:         Enabled");
   console.log(`PDF pages:   Maximum ${MAX_PDF_PAGES}`);
   console.log(`File limit:  ${MAX_FILES} files`);

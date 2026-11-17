@@ -2827,6 +2827,73 @@ body.dark .modal-sub, body.dark .modal-note { color: #a6aec2; }
         justify-content: center;
     }
 }
+
+/* --- mobile pass 3 (phone-tested): pass 2 let the
+   composer wrap freely, which crushed the textarea to a
+   sliver between the pills and the mic. This pass gives
+   the composer two deliberate rows - tools on top, input
+   below - and makes the app full-bleed on phones instead
+   of a floating card. --- */
+@media (max-width: 760px) {
+    .app {
+        padding: 0;
+        gap: 0;
+    }
+
+    .main {
+        border: none;
+        border-radius: 0;
+    }
+
+    .composer {
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 8px;
+    }
+
+    .attach-wrap {
+        order: 1;
+        flex: 0 0 auto;
+    }
+
+    .web-search-btn {
+        order: 2;
+        flex: 0 0 auto;
+    }
+
+    .auto-badge {
+        order: 3;
+        margin-left: auto;
+        border-color: rgba(38, 49, 74, .18) !important;
+    }
+
+    .composer textarea {
+        order: 4;
+        flex: 1 1 52%;
+        min-height: 46px;
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, .65);
+        border-radius: 14px;
+    }
+
+    body.dark .composer textarea {
+        background: rgba(255, 255, 255, .08);
+    }
+
+    #micBtn {
+        order: 5;
+        flex: 0 0 auto;
+    }
+
+    .send-btn {
+        order: 6;
+        flex: 0 0 auto;
+    }
+
+    .chat-area {
+        padding: 16px 10px;
+    }
+}
 </style>
 <link rel="icon" type="image/webp" href="/convogen-logo.webp">
 </head>
