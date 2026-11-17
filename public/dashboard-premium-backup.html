@@ -1,0 +1,4608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102b46">
+<title>ConvoGen AI — Your AI Workspace</title>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+<style>
+:root {
+    color-scheme: light;
+    --primary: #13a99b;
+    --primary-dark: #087f83;
+    --primary-soft: #e6f7f4;
+    --navy: #102b46;
+    --navy-light: #183c5a;
+    --bg: #f6f8fc;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --text: #172f49;
+    --text-secondary: #6d7f93;
+    --muted: #9aa8b8;
+    --border: #e9eef4;
+    --border-strong: #dce5ed;
+    --sidebar-width: 278px;
+    --shadow: 0 8px 30px rgba(16,43,70,.055);
+    --radius: 16px;
+}
+
+body.dark {
+    color-scheme: dark;
+    --primary: #27c7b5;
+    --primary-dark: #1aafa3;
+    --primary-soft: #163d40;
+    --navy: #0c1c2d;
+    --navy-light: #172d43;
+    --bg: #101b29;
+    --surface: #172638;
+    --surface-soft: #1c2d40;
+    --text: #edf4fa;
+    --text-secondary: #b0c0d0;
+    --muted: #8294a8;
+    --border: #2a3b4e;
+    --border-strong: #364a5f;
+    --shadow: 0 8px 30px rgba(0,0,0,.16);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+}
+
+button, textarea, select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--navy);
+    color: #fff;
+    padding: 23px 15px 14px;
+    z-index: 20;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 8px 25px;
+}
+
+.brand-logo {
+    width: 39px;
+    height: 39px;
+    object-fit: contain;
+}
+
+.brand-name {
+    font-size: 21px;
+    font-weight: 750;
+    letter-spacing: -.7px;
+}
+
+.brand-name span {
+    color: #36cabb;
+}
+
+.brand-caption {
+    color: #9db1c3;
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.new-chat {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 10px;
+    background: rgba(255,255,255,.09);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 650;
+    transition: .2s;
+}
+
+.new-chat:hover {
+    background: rgba(255,255,255,.16);
+}
+
+.new-chat svg {
+    width: 16px;
+    height: 16px;
+}
+
+.history-heading {
+    padding: 25px 8px 10px;
+    color: #9db1c3;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    font-weight: 700;
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 8px;
+    margin-bottom: 3px;
+    border-radius: 8px;
+    color: #d3e0eb;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.history-item:hover,
+.history-item.active {
+    background: rgba(255,255,255,.11);
+}
+
+.history-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+}
+
+.history-actions {
+    display: flex;
+    gap: 2px;
+    opacity: .65;
+}
+
+.history-item:hover .history-actions {
+    opacity: 1;
+}
+
+.history-actions button {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 0;
+    border-radius: 5px;
+    color: #d3e0eb;
+    background: transparent;
+}
+
+.history-actions button:hover {
+    background: rgba(255,255,255,.13);
+}
+
+.history-actions svg {
+    width: 13px;
+    height: 13px;
+}
+
+.empty-history {
+    color: #9db1c3;
+    font-size: 11px;
+    padding: 10px 8px;
+}
+
+.sidebar-links {
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.13);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    padding: 11px 9px;
+    color: #c8d6e2;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 11px;
+}
+
+.sidebar-link:hover {
+    background: rgba(255,255,255,.09);
+}
+
+.sidebar-link svg {
+    width: 15px;
+    height: 15px;
+}
+
+.sidebar-bottom {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 15px 5px 3px;
+    border-top: 1px solid rgba(255,255,255,.13);
+    margin-top: 10px;
+}
+
+.user-avatar {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #1c9e99;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.user-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.user-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.user-caption {
+    font-size: 9px;
+    color: #9db1c3;
+    margin-top: 3px;
+}
+
+.usage-box {
+    margin-top: 12px;
+    padding: 11px 12px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 12px;
+    background: rgba(255,255,255,.05);
+}
+
+.usage-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.usage-plan {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.usage-count {
+    font-size: 10px;
+    color: #9db1c3;
+    white-space: nowrap;
+}
+
+.usage-track {
+    height: 5px;
+    margin-top: 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    overflow: hidden;
+}
+
+.usage-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--primary);
+    transition: width .4s ease;
+}
+
+.usage-fill.low {
+    background: #f59e0b;
+}
+
+.usage-fill.empty {
+    background: #ef4444;
+}
+
+.usage-caption {
+    margin-top: 8px;
+    font-size: 9px;
+    color: #9db1c3;
+}
+
+.upgrade-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.upgrade-btn:hover {
+    filter: brightness(1.07);
+}
+
+/* PLANS MODAL */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(6, 20, 34, .55);
+}
+
+.modal-backdrop[hidden] {
+    display: none;
+}
+
+.modal {
+    width: 100%;
+    max-width: 430px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 22px;
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h3 {
+    font-size: 17px;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.modal-sub {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+.plan-cards {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.plan-card {
+    padding: 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    background: var(--surface-soft);
+}
+
+.plan-card.current {
+    border-color: var(--primary);
+}
+
+.plan-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.plan-card-name {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.plan-card-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.plan-card-price span {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.plan-card-detail {
+    margin-top: 5px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.plan-card button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 9px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.plan-card button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.modal-note {
+    margin-top: 14px;
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-align: center;
+}
+
+
+.logout-btn {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #d4e0e9;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,.12);
+}
+
+.logout-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* MAIN */
+
+.main {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+}
+
+.topbar {
+    height: 66px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 26px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.topbar-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    background: #20bd8b;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(32,189,139,.12);
+}
+
+.theme-toggle,
+.mobile-menu {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.theme-toggle:hover {
+    color: var(--primary-dark);
+}
+
+.theme-toggle svg,
+.mobile-menu svg {
+    width: 16px;
+    height: 16px;
+}
+
+.mobile-menu {
+    display: none;
+}
+
+/* CHAT AREA */
+
+.chat-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 30px 24px;
+    scroll-behavior: smooth;
+}
+
+.chat-content {
+    width: 100%;
+    max-width: 850px;
+    min-height: 100%;
+    margin: 0 auto;
+}
+
+.welcome {
+    padding: 65px 10px 35px;
+    text-align: center;
+}
+
+.welcome-icon {
+    width: 68px;
+    height: 68px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 20px;
+    border: 1px solid var(--border);
+    border-radius: 21px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.welcome-icon img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.welcome-eyebrow {
+    color: var(--primary-dark);
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 13px;
+}
+
+.welcome h1 {
+    color: var(--text);
+    font-size: clamp(27px, 4vw, 38px);
+    letter-spacing: -1.3px;
+    line-height: 1.2;
+}
+
+.welcome h1 span {
+    color: var(--primary-dark);
+}
+
+.welcome-description {
+    max-width: 540px;
+    margin: 15px auto 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.suggestion-heading {
+    margin: 39px 0 13px;
+    text-align: left;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+}
+
+.suggestion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    transition: .2s;
+}
+
+.suggestion:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.suggestion-icon {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+    color: var(--primary-dark);
+    background: var(--primary-soft);
+    border-radius: 10px;
+}
+
+.suggestion-icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+.suggestion-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.suggestion-content strong {
+    display: block;
+    font-size: 11px;
+}
+
+.suggestion-content span {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.suggestion-arrow {
+    color: var(--muted);
+}
+
+.suggestion-arrow svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* MESSAGES */
+
+.message-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin: 0 0 27px;
+}
+
+.message-row.user {
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: var(--navy);
+    color: white;
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.message-row.user .avatar {
+    background: var(--primary);
+}
+
+.message-body {
+    max-width: min(85%, 720px);
+    min-width: 0;
+}
+
+.message-text {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px 14px 14px 14px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+.user .message-text {
+    border-color: transparent;
+    border-radius: 14px 4px 14px 14px;
+    background: var(--primary-soft);
+}
+
+.message-text p {
+    margin: 0 0 10px;
+}
+
+.message-text p:last-child {
+    margin-bottom: 0;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3 {
+    margin: 17px 0 9px;
+    line-height: 1.35;
+}
+
+.message-text h1 { font-size: 20px; }
+.message-text h2 { font-size: 17px; }
+.message-text h3 { font-size: 15px; }
+
+.message-text ul,
+.message-text ol {
+    padding-left: 22px;
+    margin: 8px 0;
+}
+
+.message-text li {
+    margin: 4px 0;
+}
+
+.message-text blockquote {
+    border-left: 3px solid var(--primary);
+    padding-left: 12px;
+    color: var(--text-secondary);
+    margin: 10px 0;
+}
+
+.message-text a {
+    color: var(--primary-dark);
+}
+
+.message-text code:not(pre code) {
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: var(--surface-soft);
+    font-family: Consolas, monospace;
+    font-size: 12px;
+}
+
+.message-text pre {
+    margin: 12px 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #0d1724;
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 11px;
+    color: #cbd5e1;
+    background: #162335;
+    font-size: 10px;
+}
+
+.copy-code {
+    padding: 5px 8px;
+    color: #dce6ef;
+    background: transparent;
+    border: 1px solid #405066;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.copy-code:hover {
+    background: #27374b;
+}
+
+.message-text pre code {
+    display: block;
+    padding: 14px;
+    overflow-x: auto;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    tab-size: 4;
+}
+
+.message-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 7px;
+}
+
+.user .message-actions {
+    justify-content: flex-end;
+}
+
+.message-action {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+.message-action:hover {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--primary-dark);
+}
+
+.message-action svg {
+    width: 13px;
+    height: 13px;
+}
+
+/* TYPING */
+
+.typing {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: typing 1s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: .5;
+    }
+    30% {
+        transform: translateY(-4px);
+        opacity: 1;
+    }
+}
+
+/* COMPOSER */
+
+.composer-wrap {
+    flex-shrink: 0;
+    padding: 12px 24px 17px;
+    background: linear-gradient(180deg, transparent, var(--bg) 20%);
+}
+
+.composer-container {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 10px 11px 10px 15px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    transition: .2s;
+}
+
+.composer:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(19,169,155,.1);
+}
+
+#modelSelect {
+    width: 165px;
+    max-width: 35%;
+    flex-shrink: 0;
+    padding: 9px 8px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 10px;
+    outline: none;
+}
+
+#messageInput {
+    flex: 1;
+    min-width: 0;
+    max-height: 145px;
+    resize: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 7px 0;
+}
+
+#messageInput::placeholder {
+    color: var(--muted);
+}
+
+.send-btn,
+.attach-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 11px;
+    transition: .2s;
+}
+
+.send-btn {
+    background: linear-gradient(135deg, #168eae, #19b5a5);
+    color: white;
+}
+
+.send-btn:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+.send-btn:disabled,
+.attach-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.send-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.attach-btn {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.web-search-btn {
+    height: 36px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 11px;
+    border-radius: 11px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.web-search-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+.web-search-btn.active {
+    background: rgba(19, 169, 155, .12);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.web-search-btn:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.attach-btn:hover {
+    color: var(--primary-dark);
+    border-color: var(--primary);
+}
+
+.attach-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+.attachment-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 9px;
+}
+
+.attachment-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 10px;
+}
+
+.attachment-chip > svg {
+    width: 15px;
+    height: 15px;
+    color: var(--primary-dark);
+    flex-shrink: 0;
+}
+
+.attachment-chip-name {
+    max-width: 180px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.attachment-chip-size {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.attachment-remove {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.attachment-remove:hover {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+}
+
+.attachment-remove svg {
+    width: 13px;
+    height: 13px;
+}
+
+.upload-hint {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 9px;
+    text-align: center;
+}
+
+.composer-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.composer-footer svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* TOAST */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 25px;
+    z-index: 100;
+    max-width: calc(100% - 30px);
+    padding: 12px 17px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--navy);
+    color: white;
+    box-shadow: var(--shadow);
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 12px);
+    transition: .25s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.mobile-backdrop {
+    display: none;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 760px) {
+    .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        height: 100dvh;
+        transform: translateX(-100%);
+        transition: transform .25s;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 15;
+        background: rgba(0,0,0,.4);
+    }
+
+    .mobile-backdrop.show {
+        display: block;
+    }
+
+    .mobile-menu {
+        display: grid;
+    }
+
+    .topbar {
+        height: 61px;
+        min-height: 61px;
+        padding: 0 13px;
+    }
+
+    .chat-area {
+        padding: 20px 12px;
+    }
+
+    .welcome {
+        padding: 42px 5px 25px;
+    }
+
+    .welcome h1 {
+        font-size: 28px;
+    }
+
+    .suggestions {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .suggestion {
+        padding: 13px;
+    }
+
+    .message-row {
+        gap: 8px;
+        margin-bottom: 22px;
+    }
+
+    .avatar {
+        width: 31px;
+        height: 31px;
+    }
+
+    .message-body {
+        max-width: calc(100% - 40px);
+    }
+
+    .message-text {
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .composer-wrap {
+        padding: 8px 11px 12px;
+    }
+
+    .composer {
+        border-radius: 14px;
+        padding: 8px 9px 8px 10px;
+        gap: 7px;
+    }
+
+    #modelSelect {
+        width: 112px;
+        max-width: 34%;
+        font-size: 9px;
+        padding: 8px 4px;
+    }
+
+    .attach-btn,
+    .send-btn {
+        width: 33px;
+        height: 33px;
+    }
+
+    .attachment-chip-name {
+        max-width: 115px;
+    }
+
+    .topbar-right {
+        gap: 7px;
+    }
+
+    .status {
+        font-size: 10px;
+    }
+
+    .theme-toggle {
+        width: 33px;
+        height: 33px;
+    }
+}
+
+@media(max-width: 380px) {
+    .web-search-btn {
+        padding: 0 9px;
+    }
+
+    .web-search-btn span {
+        display: none;
+    }
+    .brand-name {
+        font-size: 19px;
+    }
+
+    .welcome h1 {
+        font-size: 25px;
+    }
+
+    .status {
+        display: none;
+    }
+
+    #modelSelect {
+        width: 90px;
+    }
+}
+
+@media(prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* H-ADE — HARDWARE STUDIO (Integration I3) */
+
+.hade-nav-badge {
+    margin-left: auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .05em;
+}
+
+.sidebar-link.active {
+    background: rgba(255,255,255,.13);
+    color: #fff;
+}
+
+.hade-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 30px 24px;
+}
+
+.hade-content {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.hade-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.hade-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.hade-sub {
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    max-width: 560px;
+}
+
+.hade-usage {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.hade-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+.hade-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+#hadeRequirement {
+    width: 100%;
+    resize: vertical;
+    min-height: 74px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#hadeRequirement:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 0;
+    border-color: transparent;
+}
+
+.hade-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.hade-chip {
+    padding: 7px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.hade-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.hade-note {
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.hade-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.hade-generate {
+    padding: 11px 22px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.hade-generate:hover {
+    filter: brightness(1.06);
+}
+
+.hade-generate:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+.hade-actions-note {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.hade-status-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.hade-spinner {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    border-top-color: var(--primary);
+    animation: hade-spin 0.8s linear infinite;
+}
+
+@keyframes hade-spin {
+    to { transform: rotate(360deg); }
+}
+
+.hade-dots {
+    display: inline-flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.hade-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border-strong);
+}
+
+.hade-dot.done {
+    background: var(--primary);
+}
+
+.hade-dot.current {
+    background: var(--primary);
+    opacity: .45;
+}
+
+.hade-log {
+    margin-top: 14px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--navy);
+    color: #cfe3d8;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.hade-result-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hade-badge {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.hade-badge.ok {
+    background: #e2f6ec;
+    color: #0c7a43;
+}
+
+.hade-badge.warn {
+    background: #fdf0dc;
+    color: #9a6206;
+}
+
+.hade-badge.bad {
+    background: #fde4e4;
+    color: #a12626;
+}
+
+body.dark .hade-badge.ok {
+    background: #14382a;
+    color: #4ade9c;
+}
+
+body.dark .hade-badge.warn {
+    background: #3d2f10;
+    color: #f2b544;
+}
+
+body.dark .hade-badge.bad {
+    background: #3d1a1a;
+    color: #f28b8b;
+}
+
+.hade-badge.info {
+    background: #e0ecfd;
+    color: #1d4fa1;
+}
+
+body.dark .hade-badge.info {
+    background: #16283d;
+    color: #7db4f2;
+}
+
+.hade-archetype {
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    border: 1px solid var(--primary, #13a99b);
+    color: var(--primary, #13a99b);
+}
+
+.hade-purpose {
+    font-size: 11px;
+    opacity: .62;
+    margin-top: 2px;
+}
+
+.hade-answer-row {
+    margin: 10px 0;
+}
+
+.hade-answer-row label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.hade-answer-row input,
+.hade-answer-row select {
+    width: 100%;
+    max-width: 340px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(120, 130, 150, .35);
+    background: transparent;
+    color: inherit;
+    font-size: 13px;
+}
+
+.hade-answer-soon {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: #e0ecfd;
+    color: #1d4fa1;
+}
+
+body.dark .hade-answer-soon {
+    background: #16283d;
+    color: #7db4f2;
+}
+
+.hade-result-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.hade-req {
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text);
+}
+
+.hade-error {
+    margin-top: 10px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #a12626;
+}
+
+body.dark .hade-error {
+    color: #f28b8b;
+}
+
+.hade-questions {
+    margin: 8px 0 4px 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.hade-questions li {
+    margin-bottom: 6px;
+}
+
+.hade-card h4 {
+    margin: 18px 0 9px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.hade-card h4:first-child {
+    margin-top: 0;
+}
+
+.hade-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.hade-table th,
+.hade-table td {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.hade-table th {
+    background: var(--surface-soft);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-secondary);
+}
+
+.hade-spec-line {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.hade-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hade-file-btn {
+    padding: 7px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 9px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.hade-file-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.hade-preview {
+    margin-top: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.hade-preview-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 14px;
+    background: var(--surface-soft);
+    border-bottom: 1px solid var(--border);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.hade-preview-close {
+    border: 0;
+    background: transparent;
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hade-preview-body {
+    max-height: 420px;
+    overflow: auto;
+    padding: 14px;
+    background: var(--surface);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+}
+
+.hade-history-title {
+    margin: 0 0 6px !important;
+}
+
+.hade-history-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 6px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.hade-history-row:last-child {
+    border-bottom: 0;
+}
+
+.hade-history-row:hover {
+    background: var(--surface-soft);
+}
+
+.hade-history-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.hade-history-req {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.hade-history-date {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.hade-pill {
+    flex-shrink: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.hade-pill.running {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+}
+
+.hade-pill.passed {
+    background: #e2f6ec;
+    color: #0c7a43;
+}
+
+.hade-pill.failed {
+    background: #fdf0dc;
+    color: #9a6206;
+}
+
+.hade-pill.error {
+    background: #fde4e4;
+    color: #a12626;
+}
+
+body.dark .hade-pill.passed {
+    background: #14382a;
+    color: #4ade9c;
+}
+
+body.dark .hade-pill.failed {
+    background: #3d2f10;
+    color: #f2b544;
+}
+
+body.dark .hade-pill.error {
+    background: #3d1a1a;
+    color: #f28b8b;
+}
+
+.hade-pill.clarification_needed {
+    background: #e0ecfd;
+    color: #1d4fa1;
+}
+
+body.dark .hade-pill.clarification_needed {
+    background: #16283d;
+    color: #7db4f2;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <img class="brand-logo"
+                 src="/convogen-logo.webp"
+                 alt="ConvoGen logo">
+
+            <div>
+                <div class="brand-name">ConvoGen <span>AI</span></div>
+                <div class="brand-caption">Your intelligent workspace</div>
+            </div>
+        </div>
+
+        <button class="new-chat" id="newChatBtn" type="button">
+            <i data-lucide="plus"></i>
+            <span>Start a new chat</span>
+        </button>
+
+        <div class="history-heading">Your conversations</div>
+
+        <div class="history-list" id="historyList">
+            <div class="empty-history">Loading conversations...</div>
+        </div>
+
+        <nav class="sidebar-links">
+            <button class="sidebar-link" id="hadeNavBtn" type="button">
+                <i data-lucide="cpu"></i>
+                <span>Hardware Studio</span>
+                <span class="hade-nav-badge">H-ADE</span>
+            </button>
+
+            <button class="sidebar-link" id="sidebarThemeBtn" type="button">
+                <i data-lucide="moon" id="sidebarThemeIcon"></i>
+                <span id="sidebarThemeText">Dark appearance</span>
+            </button>
+        </nav>
+
+        <div class="usage-box" id="usageBox" hidden>
+            <div class="usage-row">
+                <span class="usage-plan" id="usagePlan">Free plan</span>
+                <span class="usage-count" id="usageCount"></span>
+            </div>
+
+            <div class="usage-track">
+                <div class="usage-fill" id="usageFill"></div>
+            </div>
+
+            <div class="usage-caption" id="usageCaption"></div>
+
+            <button class="upgrade-btn" id="upgradeBtn" type="button" hidden>
+                Upgrade plan
+            </button>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-avatar" id="userAvatar">CG</div>
+
+            <div class="user-info">
+                <div class="user-name" id="userEmail">Your account</div>
+                <div class="user-caption">ConvoGen AI account</div>
+            </div>
+
+            <button class="logout-btn" id="logoutBtn"
+                    type="button" title="Logout" aria-label="Logout">
+                <i data-lucide="log-out"></i>
+            </button>
+        </div>
+    </aside>
+
+    <div class="mobile-backdrop" id="mobileBackdrop"></div>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="mobile-menu" id="menuBtn"
+                    type="button" aria-label="Open navigation">
+                <i data-lucide="menu"></i>
+            </button>
+
+            <div class="topbar-title" id="chatTitle">
+                New conversation
+            </div>
+
+            <div class="topbar-right">
+                <button class="theme-toggle" id="themeBtn"
+                        type="button" title="Toggle appearance"
+                        aria-label="Toggle appearance">
+                    <i data-lucide="moon" id="themeIcon"></i>
+                </button>
+
+                <div class="status">
+                    <span class="status-dot"></span>
+                    <span>AI workspace</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="chat-area" id="chatArea">
+            <div class="chat-content">
+
+                <div class="welcome" id="welcome">
+                    <div class="welcome-icon">
+                        <img src="/convogen-logo.webp" alt="ConvoGen">
+                    </div>
+
+                    <div class="welcome-eyebrow">
+                        Welcome to your AI workspace
+                    </div>
+
+                    <h1>Hello, <span>let's create something.</span></h1>
+
+                    <p class="welcome-description">
+                        Your ideas deserve intelligent conversations.
+                        Ask questions, explore new concepts, solve problems
+                        and bring your ideas to life.
+                    </p>
+
+                    <div class="suggestion-heading">
+                        Get started with an idea
+                    </div>
+
+                    <div class="suggestions">
+                        <button class="suggestion"
+                            data-prompt="Explain artificial intelligence in simple terms with examples.">
+                            <div class="suggestion-icon">
+                                <i data-lucide="brain"></i>
+                            </div>
+                            <div class="suggestion-content">
+                                <strong>Explore a topic</strong>
+                                <span>Understand something new with clear explanations.</span>
+                            </div>
+                            <div class="suggestion-arrow">
+                                <i data-lucide="arrow-up-right"></i>
+                            </div>
+                        </button>
+
+                        <button class="suggestion"
+                            data-prompt="Give me five creative and practical ideas for a new project.">
+                            <div class="suggestion-icon">
+                                <i data-lucide="lightbulb"></i>
+                            </div>
+                            <div class="suggestion-content">
+                                <strong>Brainstorm ideas</strong>
+                                <span>Discover creative possibilities and fresh approaches.</span>
+                            </div>
+                            <div class="suggestion-arrow">
+                                <i data-lucide="arrow-up-right"></i>
+                            </div>
+                        </button>
+
+                        <button class="suggestion"
+                            data-prompt="Help me write a professional and friendly email.">
+                            <div class="suggestion-icon">
+                                <i data-lucide="pen-line"></i>
+                            </div>
+                            <div class="suggestion-content">
+                                <strong>Write something</strong>
+                                <span>Create emails, content and professional documents.</span>
+                            </div>
+                            <div class="suggestion-arrow">
+                                <i data-lucide="arrow-up-right"></i>
+                            </div>
+                        </button>
+
+                        <button class="suggestion"
+                            data-prompt="Help me write a JavaScript program with a clear explanation.">
+                            <div class="suggestion-icon">
+                                <i data-lucide="code-2"></i>
+                            </div>
+                            <div class="suggestion-content">
+                                <strong>Build with code</strong>
+                                <span>Explore programming, debugging and development.</span>
+                            </div>
+                            <div class="suggestion-arrow">
+                                <i data-lucide="arrow-up-right"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="messages"></div>
+            </div>
+        </section>
+
+        <section class="hade-area" id="hadeArea" hidden>
+            <div class="hade-content">
+
+                <div class="hade-head">
+                    <div>
+                        <h2 class="hade-title">Hardware Studio</h2>
+                        <p class="hade-sub">
+                            H-ADE turns a plain-English description into a
+                            tested ESP32 firmware project — generated,
+                            simulated and self-healed by AI, then packed
+                            as a downloadable ZIP.
+                        </p>
+                    </div>
+
+                    <div class="hade-usage" id="hadeUsage" hidden></div>
+                </div>
+
+                <div class="hade-card">
+                    <label class="hade-label" for="hadeRequirement">
+                        Describe your hardware project
+                    </label>
+
+                    <textarea id="hadeRequirement" rows="3" maxlength="1000"
+                        placeholder="e.g. Turn on a relay when my room gets hotter than 30 degrees, using a DHT22 sensor"></textarea>
+
+                    <div class="hade-chips">
+                        <button type="button" class="hade-chip"
+                            data-hade-example="Turn on a relay when my room gets hotter than 30 degrees, using a DHT22 sensor on an ESP32.">
+                            Climate relay
+                        </button>
+                        <button type="button" class="hade-chip"
+                            data-hade-example="Server shelf cooling: read a DHT22 every 2 seconds and switch a relay on when the temperature rises above 30 degrees.">
+                            Server shelf cooling
+                        </button>
+                        <button type="button" class="hade-chip"
+                            data-hade-example="Create a smart greenhouse monitoring system. Monitor temperature and humidity, control a ventilation fan when temperature exceeds 32°C, and activate an alarm when humidity falls below 40%.">
+                            Greenhouse system
+                        </button>
+                    </div>
+
+                    <p class="hade-note">
+                        Supports: ESP32 with a DHT22 sensor, relay
+                        modules, LEDs and buzzers — the AI designs the pin map
+                        and the rules from your words. Give numbers for
+                        thresholds (e.g. above 32°C): if a part isn't
+                        supported or a number is missing, H-ADE asks
+                        instead of guessing.
+                    </p>
+
+                    <div class="hade-actions">
+                        <button class="hade-generate" id="hadeGenerateBtn"
+                                type="button">
+                            Generate project
+                        </button>
+                        <span class="hade-actions-note">
+                            Takes about 30 seconds to 3 minutes — the AI
+                            tests and repairs its own firmware.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="hade-card" id="hadeStatusCard" hidden>
+                    <div class="hade-status-row">
+                        <span class="hade-spinner"></span>
+                        <span id="hadePhase">Starting…</span>
+                        <span class="hade-dots" id="hadeDots"></span>
+                    </div>
+
+                    <pre class="hade-log" id="hadeLog"></pre>
+                </div>
+
+                <div class="hade-card" id="hadeResultCard" hidden>
+                    <div class="hade-result-head">
+                        <span class="hade-badge" id="hadeBadge"></span>
+                        <span class="hade-archetype" id="hadeArchetype"
+                              hidden></span>
+                        <span class="hade-result-meta" id="hadeResultMeta"></span>
+                    </div>
+
+                    <p class="hade-req" id="hadeResultReq"></p>
+                    <p class="hade-error" id="hadeResultError" hidden></p>
+
+                    <div id="hadeQuestions" hidden>
+                        <h4>H-ADE needs a few details</h4>
+                        <ul class="hade-questions" id="hadeQuestionsList"></ul>
+                        <p class="hade-note">
+                            Nothing was guessed or invented. Add the
+                            missing details to your description and
+                            generate again — a clarification does not
+                            use one of your daily projects.
+                        </p>
+                        <div id="hadeAnswers" hidden>
+                            <div id="hadeAnswerFields"></div>
+                            <div class="hade-actions">
+                                <button type="button" class="hade-generate"
+                                        id="hadeAnswerBtn">
+                                    Add answers &amp; regenerate
+                                </button>
+                            </div>
+                            <p class="hade-note">
+                                Your answers are added to this same
+                                project — answering never uses an
+                                extra daily project.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="hadePinWrap" hidden>
+                        <h4>Pin map</h4>
+                        <table class="hade-table">
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Role</th>
+                                    <th>Pin</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hadePinBody"></tbody>
+                        </table>
+                    </div>
+
+                    <p class="hade-spec-line" id="hadeSpecLine" hidden></p>
+
+                    <h4 id="hadeFilesTitle">Project files</h4>
+                    <div class="hade-files" id="hadeFiles"></div>
+
+                    <div class="hade-actions">
+                        <a class="hade-generate" id="hadeDownloadBtn"
+                           href="#" download>
+                            Download project ZIP
+                        </a>
+                    </div>
+
+                    <div class="hade-preview" id="hadePreview" hidden>
+                        <div class="hade-preview-head">
+                            <span id="hadePreviewName"></span>
+                            <button type="button" class="hade-preview-close"
+                                    id="hadePreviewClose">
+                                Close
+                            </button>
+                        </div>
+                        <div class="hade-preview-body" id="hadePreviewBody"></div>
+                    </div>
+                </div>
+
+                <div class="hade-card">
+                    <h4 class="hade-history-title">Your hardware projects</h4>
+                    <div id="hadeHistory">
+                        <div class="empty-history">Loading…</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="composer-wrap" id="composerWrap">
+            <div class="composer-container">
+
+                <div class="attachment-preview" id="attachmentPreview"></div>
+
+                <form class="composer" id="chatForm"
+                      enctype="multipart/form-data">
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".pdf,.docx,.txt,.md,.csv,.json,.png,.jpg,.jpeg,.webp"
+                        multiple
+                        hidden
+                    >
+
+                    <button
+                        class="attach-btn"
+                        id="attachBtn"
+                        type="button"
+                        title="Attach files"
+                        aria-label="Attach files"
+                    >
+                        <i data-lucide="paperclip"></i>
+                    </button>
+
+                    <button
+                        class="web-search-btn"
+                        id="webSearchBtn"
+                        type="button"
+                        title="Search the web for up-to-date information"
+                        aria-pressed="false"
+                    >
+                        <i data-lucide="globe"></i>
+                        <span>Web</span>
+                    </button>
+
+                    <select id="modelSelect" aria-label="Choose AI model">
+                        <option value="">Loading models...</option>
+                    </select>
+
+                    <textarea
+                        id="messageInput"
+                        placeholder="Message ConvoGen AI..."
+                        rows="1"
+                        maxlength="8000"
+                        aria-label="Message ConvoGen AI"
+                    ></textarea>
+
+                    <button class="send-btn" id="sendBtn"
+                            type="submit" aria-label="Send message">
+                        <i data-lucide="arrow-up"></i>
+                    </button>
+                </form>
+
+                <div class="upload-hint">
+                    PDF, DOCX, TXT, MD, CSV, JSON and images ·
+                    Maximum 5 files · 10 MB each
+                </div>
+
+                <div class="composer-footer">
+                    <i data-lucide="shield-check"></i>
+                    <span>ConvoGen AI can make mistakes. Verify important information.</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<div class="modal-backdrop" id="plansModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plansTitle">
+        <div class="modal-header">
+            <h3 id="plansTitle">Upgrade ConvoGen AI</h3>
+            <button class="modal-close" id="plansClose" type="button" aria-label="Close">&times;</button>
+        </div>
+
+        <p class="modal-sub">
+            One payment gives you 30 days of the higher plan.
+            Nothing is auto-charged — renew only if you want to.
+        </p>
+
+        <div class="plan-cards" id="planCards"></div>
+
+        <p class="modal-note">
+            Payments are processed securely by Razorpay.
+            UPI, cards and netbanking are accepted.
+        </p>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ELEMENTS */
+
+const historyList = document.getElementById("historyList");
+const chatArea = document.getElementById("chatArea");
+const messagesElement = document.getElementById("messages");
+const welcomeElement = document.getElementById("welcome");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatForm = document.getElementById("chatForm");
+const modelSelect = document.getElementById("modelSelect");
+const chatTitle = document.getElementById("chatTitle");
+const userEmail = document.getElementById("userEmail");
+const usageBox = document.getElementById("usageBox");
+const usagePlan = document.getElementById("usagePlan");
+const usageCount = document.getElementById("usageCount");
+const usageFill = document.getElementById("usageFill");
+const usageCaption = document.getElementById("usageCaption");
+const upgradeBtn = document.getElementById("upgradeBtn");
+const plansModal = document.getElementById("plansModal");
+const plansClose = document.getElementById("plansClose");
+const planCards = document.getElementById("planCards");
+const userAvatar = document.getElementById("userAvatar");
+const toast = document.getElementById("toast");
+const sidebar = document.getElementById("sidebar");
+const backdrop = document.getElementById("mobileBackdrop");
+
+const fileInput = document.getElementById("fileInput");
+const attachBtn = document.getElementById("attachBtn");
+const webSearchBtn = document.getElementById("webSearchBtn");
+const attachmentPreview = document.getElementById("attachmentPreview");
+
+let conversations = [];
+let currentConversationId = null;
+let isSending = false;
+let toastTimeout = null;
+let selectedFiles = [];
+let webSearchEnabled = false;
+
+const MAX_FILES = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+const ALLOWED_FILE_EXTENSIONS = [
+    ".pdf",
+    ".docx",
+    ".txt",
+    ".md",
+    ".csv",
+    ".json",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp"
+];
+
+/* ICONS */
+
+function refreshIcons() {
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+/* THEME */
+
+function applyTheme(theme) {
+    const dark = theme === "dark";
+
+    document.body.classList.toggle("dark", dark);
+    localStorage.setItem("convogen-theme", theme);
+
+    document.getElementById("themeIcon").setAttribute(
+        "data-lucide",
+        dark ? "sun" : "moon"
+    );
+
+    document.getElementById("sidebarThemeIcon").setAttribute(
+        "data-lucide",
+        dark ? "sun" : "moon"
+    );
+
+    document.getElementById("sidebarThemeText").textContent =
+        dark ? "Light appearance" : "Dark appearance";
+
+    refreshIcons();
+}
+
+function toggleTheme() {
+    applyTheme(
+        document.body.classList.contains("dark")
+            ? "light"
+            : "dark"
+    );
+}
+
+function initializeTheme() {
+    applyTheme(
+        localStorage.getItem("convogen-theme") === "dark"
+            ? "dark"
+            : "light"
+    );
+}
+
+document.getElementById("themeBtn").addEventListener(
+    "click",
+    toggleTheme
+);
+
+document.getElementById("sidebarThemeBtn").addEventListener(
+    "click",
+    toggleTheme
+);
+
+/* MARKDOWN */
+
+marked.setOptions({
+    gfm: true,
+    breaks: true
+});
+
+function renderMarkdown(content) {
+    return DOMPurify.sanitize(
+        marked.parse(String(content || "")),
+        {
+            USE_PROFILES: {
+                html: true
+            }
+        }
+    );
+}
+
+/* TOAST */
+
+function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimeout);
+
+    toastTimeout = window.setTimeout(() => {
+        toast.classList.remove("show");
+    }, 4000);
+}
+
+/* API HELPER */
+
+async function api(url, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    const isFormData = options.body instanceof FormData;
+
+    if (options.body && !isFormData && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    if (isFormData) {
+        delete headers["Content-Type"];
+    }
+
+    const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options,
+        headers
+    });
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (response.status === 401) {
+        window.location.replace("/login");
+        throw new Error("Please log in again.");
+    }
+
+    if (!response.ok) {
+        throw new Error(data.error || "Something went wrong.");
+    }
+
+    return data;
+}
+
+/* MODEL SELECTOR */
+
+async function loadModels() {
+    modelSelect.disabled = true;
+
+    try {
+        const data = await api("/api/models");
+        const models = data.models || [];
+
+        modelSelect.replaceChildren();
+
+        if (!models.length) {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "No models configured";
+            modelSelect.appendChild(option);
+            return;
+        }
+
+        models.forEach(model => {
+            const option = document.createElement("option");
+            option.value = model.id;
+            option.textContent = model.label;
+            modelSelect.appendChild(option);
+        });
+
+        const saved = localStorage.getItem(
+            "convogen-selected-model"
+        );
+
+        if (saved && models.some(model => model.id === saved)) {
+            modelSelect.value = saved;
+        }
+
+        modelSelect.disabled = false;
+    } catch (error) {
+        modelSelect.replaceChildren();
+
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Models unavailable";
+        modelSelect.appendChild(option);
+
+        showToast(error.message);
+    }
+}
+
+modelSelect.addEventListener("change", () => {
+    if (modelSelect.value) {
+        localStorage.setItem(
+            "convogen-selected-model",
+            modelSelect.value
+        );
+    }
+});
+
+/* WELCOME */
+
+function hideWelcome() {
+    welcomeElement.style.display = "none";
+}
+
+function showWelcome() {
+    welcomeElement.style.display = "block";
+    messagesElement.replaceChildren();
+    chatTitle.textContent = "New conversation";
+    refreshIcons();
+}
+
+/* SCROLL */
+
+function scrollToBottom() {
+    requestAnimationFrame(() => {
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+}
+
+/* CODE BLOCKS */
+
+function enhanceCodeBlocks(container) {
+    container.querySelectorAll("pre").forEach(pre => {
+        const code = pre.querySelector("code");
+
+        if (!code || pre.dataset.enhanced === "true") {
+            return;
+        }
+
+        pre.dataset.enhanced = "true";
+
+        if (window.hljs) {
+            try {
+                hljs.highlightElement(code);
+            } catch (error) {
+                console.warn("Highlighting failed:", error);
+            }
+        }
+
+        const match = (code.className || "").match(
+            /language-([\w+-]+)/
+        );
+
+        const language = match ? match[1] : "Code";
+
+        const header = document.createElement("div");
+        header.className = "code-header";
+
+        const label = document.createElement("span");
+        label.textContent = language;
+
+        const copy = document.createElement("button");
+        copy.type = "button";
+        copy.className = "copy-code";
+        copy.textContent = "Copy code";
+
+        copy.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(code.textContent);
+                copy.textContent = "Copied!";
+
+                setTimeout(() => {
+                    copy.textContent = "Copy code";
+                }, 1500);
+            } catch {
+                showToast("Unable to copy code.");
+            }
+        });
+
+        header.append(label, copy);
+        pre.insertBefore(header, code);
+    });
+}
+
+/* ADD MESSAGE */
+
+function addMessage(role, content) {
+    hideWelcome();
+
+    const row = document.createElement("div");
+    row.className =
+        `message-row ${role === "user" ? "user" : "assistant"}`;
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = role === "user" ? "YOU" : "CG";
+
+    const body = document.createElement("div");
+    body.className = "message-body";
+
+    const text = document.createElement("div");
+    text.className = "message-text";
+
+    if (role === "user") {
+        text.textContent = content;
+    } else {
+        text.innerHTML = renderMarkdown(content);
+        enhanceCodeBlocks(text);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.className = "message-action";
+    copyButton.innerHTML =
+        '<i data-lucide="copy"></i><span>Copy</span>';
+
+    copyButton.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(content);
+
+            copyButton.querySelector("span").textContent = "Copied";
+
+            setTimeout(() => {
+                copyButton.querySelector("span").textContent = "Copy";
+            }, 1500);
+        } catch {
+            showToast("Unable to copy message.");
+        }
+    });
+
+    actions.appendChild(copyButton);
+    body.append(text, actions);
+    row.append(avatar, body);
+    messagesElement.appendChild(row);
+
+    refreshIcons();
+    scrollToBottom();
+}
+
+/* TYPING INDICATOR */
+
+function addTyping() {
+    removeTyping();
+
+    const typing = document.createElement("div");
+    typing.className = "typing";
+    typing.id = "typingIndicator";
+
+    typing.innerHTML = `
+        <div class="avatar">CG</div>
+        <div class="typing-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <span>ConvoGen is thinking...</span>
+    `;
+
+    messagesElement.appendChild(typing);
+    scrollToBottom();
+}
+
+function removeTyping() {
+    document.getElementById("typingIndicator")?.remove();
+}
+
+/* FILE ATTACHMENTS */
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function renderAttachmentPreview() {
+    attachmentPreview.replaceChildren();
+
+    selectedFiles.forEach((file, index) => {
+        const chip = document.createElement("div");
+        chip.className = "attachment-chip";
+
+        const icon = document.createElement("i");
+        icon.setAttribute("data-lucide", "file");
+
+        const name = document.createElement("span");
+        name.className = "attachment-chip-name";
+        name.textContent = file.name;
+        name.title = file.name;
+
+        const size = document.createElement("span");
+        size.className = "attachment-chip-size";
+        size.textContent = formatFileSize(file.size);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "attachment-remove";
+        remove.setAttribute(
+            "aria-label",
+            `Remove ${file.name}`
+        );
+        remove.innerHTML = '<i data-lucide="x"></i>';
+
+        remove.addEventListener("click", () => {
+            selectedFiles.splice(index, 1);
+            renderAttachmentPreview();
+        });
+
+        chip.append(icon, name, size, remove);
+        attachmentPreview.appendChild(chip);
+    });
+
+    refreshIcons();
+}
+
+function addSelectedFiles(files) {
+    const incomingFiles = Array.from(files || []);
+
+    for (const file of incomingFiles) {
+        const dotIndex = file.name.lastIndexOf(".");
+        const extension = dotIndex >= 0
+            ? file.name.slice(dotIndex).toLowerCase()
+            : "";
+
+        if (!ALLOWED_FILE_EXTENSIONS.includes(extension)) {
+            showToast(`Unsupported file type: ${file.name}`);
+            continue;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            showToast(`${file.name} exceeds the 10 MB limit.`);
+            continue;
+        }
+
+        if (file.size === 0) {
+            showToast(`${file.name} is empty.`);
+            continue;
+        }
+
+        const duplicate = selectedFiles.some(existing =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified
+        );
+
+        if (duplicate) {
+            continue;
+        }
+
+        if (selectedFiles.length >= MAX_FILES) {
+            showToast("You can attach a maximum of 5 files.");
+            break;
+        }
+
+        selectedFiles.push(file);
+    }
+
+    renderAttachmentPreview();
+}
+
+attachBtn.addEventListener("click", () => {
+    if (!isSending) {
+        fileInput.click();
+    }
+});
+
+fileInput.addEventListener("change", () => {
+    addSelectedFiles(fileInput.files);
+    fileInput.value = "";
+});
+
+/* MOBILE SIDEBAR */
+
+function openMobileSidebar() {
+    sidebar.classList.add("open");
+    backdrop.classList.add("show");
+}
+
+function closeMobileSidebar() {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+}
+
+document.getElementById("menuBtn").addEventListener(
+    "click",
+    openMobileSidebar
+);
+
+backdrop.addEventListener("click", closeMobileSidebar);
+
+/* CONVERSATION HISTORY */
+
+function renderHistory() {
+    historyList.replaceChildren();
+
+    if (!conversations.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-history";
+        empty.textContent =
+            "Your conversations will appear here.";
+
+        historyList.appendChild(empty);
+        return;
+    }
+
+    conversations.forEach(conversation => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+
+        if (conversation.id === currentConversationId) {
+            item.classList.add("active");
+        }
+
+        const title = document.createElement("div");
+        title.className = "history-title";
+        title.textContent = conversation.title || "New chat";
+        title.title = conversation.title || "New chat";
+
+        const actions = document.createElement("div");
+        actions.className = "history-actions";
+
+        const rename = document.createElement("button");
+        rename.type = "button";
+        rename.title = "Rename conversation";
+        rename.setAttribute(
+            "aria-label",
+            "Rename conversation"
+        );
+        rename.innerHTML = '<i data-lucide="pencil"></i>';
+
+        rename.addEventListener("click", event => {
+            event.stopPropagation();
+            renameConversation(conversation);
+        });
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.title = "Delete conversation";
+        remove.setAttribute(
+            "aria-label",
+            "Delete conversation"
+        );
+        remove.innerHTML = '<i data-lucide="x"></i>';
+
+        remove.addEventListener("click", event => {
+            event.stopPropagation();
+            deleteConversation(conversation);
+        });
+
+        actions.append(rename, remove);
+        item.append(title, actions);
+
+        item.addEventListener("click", () => {
+            loadConversation(conversation.id);
+        });
+
+        historyList.appendChild(item);
+    });
+
+    refreshIcons();
+}
+
+async function loadConversations() {
+    const data = await api("/api/conversations");
+    conversations = data.conversations || [];
+    renderHistory();
+}
+
+/* CREATE CHAT */
+
+async function createNewChat() {
+    try {
+        const data = await api("/api/conversations", {
+            method: "POST",
+            body: JSON.stringify({
+                title: "New chat"
+            })
+        });
+
+        const conversation = data.conversation;
+
+        conversations.unshift(conversation);
+        currentConversationId = conversation.id;
+
+        selectedFiles = [];
+        renderAttachmentPreview();
+
+        renderHistory();
+        showWelcome();
+        messageInput.focus();
+        closeMobileSidebar();
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+/* LOAD CHAT */
+
+async function loadConversation(id) {
+    try {
+        const data = await api(
+            `/api/conversations/${encodeURIComponent(id)}/messages`
+        );
+
+        currentConversationId = id;
+        messagesElement.replaceChildren();
+
+        const conversation = conversations.find(
+            item => item.id === id
+        );
+
+        chatTitle.textContent = conversation
+            ? conversation.title
+            : "Conversation";
+
+        if (!data.messages || !data.messages.length) {
+            showWelcome();
+        } else {
+            hideWelcome();
+
+            data.messages.forEach(message => {
+                addMessage(message.role, message.content);
+            });
+        }
+
+        selectedFiles = [];
+        renderAttachmentPreview();
+
+        renderHistory();
+        closeMobileSidebar();
+        scrollToBottom();
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+/* RENAME CHAT */
+
+async function renameConversation(conversation) {
+    const value = window.prompt(
+        "Enter a new conversation name:",
+        conversation.title
+    );
+
+    if (value === null) {
+        return;
+    }
+
+    const title = value.trim();
+
+    if (!title || title.length > 100) {
+        showToast(
+            "Please enter a title between 1 and 100 characters."
+        );
+        return;
+    }
+
+    try {
+        const data = await api(
+            `/api/conversations/${encodeURIComponent(conversation.id)}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({ title })
+            }
+        );
+
+        conversation.title = data.conversation.title;
+
+        if (currentConversationId === conversation.id) {
+            chatTitle.textContent = title;
+        }
+
+        renderHistory();
+        showToast("Conversation renamed.");
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+/* DELETE CHAT */
+
+async function deleteConversation(conversation) {
+    if (!window.confirm(
+        "Delete this conversation and all its messages?"
+    )) {
+        return;
+    }
+
+    try {
+        await api(
+            `/api/conversations/${encodeURIComponent(conversation.id)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        conversations = conversations.filter(
+            item => item.id !== conversation.id
+        );
+
+        if (currentConversationId === conversation.id) {
+            currentConversationId = null;
+            selectedFiles = [];
+            renderAttachmentPreview();
+
+            if (conversations.length) {
+                await loadConversation(conversations[0].id);
+            } else {
+                showWelcome();
+            }
+        }
+
+        renderHistory();
+        showToast("Conversation deleted.");
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+/* STREAMING MESSAGE VIEW */
+
+function addStreamingMessage() {
+    hideWelcome();
+
+    const row = document.createElement("div");
+    row.className = "message-row assistant";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = "CG";
+
+    const body = document.createElement("div");
+    body.className = "message-body";
+
+    const text = document.createElement("div");
+    text.className = "message-text";
+
+    body.appendChild(text);
+    row.append(avatar, body);
+    messagesElement.appendChild(row);
+    scrollToBottom();
+
+    return {
+        update(fullText) {
+            text.textContent = fullText;
+            scrollToBottom();
+        },
+
+        finish(fullText) {
+            text.innerHTML = renderMarkdown(fullText);
+            enhanceCodeBlocks(text);
+
+            const actions = document.createElement("div");
+            actions.className = "message-actions";
+
+            const copyButton = document.createElement("button");
+            copyButton.type = "button";
+            copyButton.className = "message-action";
+            copyButton.innerHTML =
+                '<i data-lucide="copy"></i><span>Copy</span>';
+
+            copyButton.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(fullText);
+
+                    copyButton.querySelector("span").textContent = "Copied";
+
+                    setTimeout(() => {
+                        copyButton.querySelector("span").textContent = "Copy";
+                    }, 1500);
+                } catch {
+                    showToast("Unable to copy message.");
+                }
+            });
+
+            actions.appendChild(copyButton);
+            body.appendChild(actions);
+            refreshIcons();
+            scrollToBottom();
+        },
+
+        cancel() {
+            row.remove();
+        }
+    };
+}
+
+/* STREAMING CHAT REQUEST */
+
+async function streamChatMessage(messageText, onText) {
+    const response = await fetch("/api/chat/stream", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: messageText,
+            conversationId: currentConversationId,
+            model: modelSelect.value
+        })
+    });
+
+    if (response.status === 401) {
+        window.location.replace("/login");
+        throw new Error("Please log in again.");
+    }
+
+    if (!response.ok) {
+        let data = {};
+
+        try {
+            data = await response.json();
+        } catch {
+            data = {};
+        }
+
+        throw new Error(data.error || "Something went wrong.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+    let fullText = "";
+    let doneData = null;
+
+    while (true) {
+        const { value, done } = await reader.read();
+
+        if (done) {
+            break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let separatorIndex;
+
+        while ((separatorIndex = buffer.indexOf("\n\n")) >= 0) {
+            const rawEvent = buffer.slice(0, separatorIndex);
+            buffer = buffer.slice(separatorIndex + 2);
+
+            let eventName = "message";
+            let dataText = "";
+
+            for (const line of rawEvent.split("\n")) {
+                if (line.startsWith("event:")) {
+                    eventName = line.slice(6).trim();
+                } else if (line.startsWith("data:")) {
+                    dataText += line.slice(5).trim();
+                }
+            }
+
+            if (!dataText) {
+                continue;
+            }
+
+            const data = JSON.parse(dataText);
+
+            if (eventName === "token") {
+                fullText += data.text || "";
+                onText(fullText);
+            } else if (eventName === "done") {
+                doneData = data;
+            } else if (eventName === "error") {
+                throw new Error(
+                    data.error || "The AI reply failed. Please try again."
+                );
+            }
+        }
+    }
+
+    if (!doneData) {
+        throw new Error(
+            "The connection ended before the reply completed."
+        );
+    }
+
+    return doneData;
+}
+
+/* SEND MESSAGE WITH ATTACHMENTS */
+
+async function sendMessage(value) {
+    if (isSending) {
+        return;
+    }
+
+    const message = String(value || "").trim();
+    const files = [...selectedFiles];
+
+    if (!message && files.length === 0) {
+        showToast("Enter a message or attach a file.");
+        return;
+    }
+
+    if (message.length > 8000) {
+        showToast("Your message is too long.");
+        return;
+    }
+
+    if (!modelSelect.value) {
+        showToast("Please select an available AI model.");
+        return;
+    }
+
+    isSending = true;
+
+    sendBtn.disabled = true;
+    attachBtn.disabled = true;
+    webSearchBtn.disabled = true;
+    fileInput.disabled = true;
+    messageInput.disabled = true;
+    modelSelect.disabled = true;
+
+    let userMessageDisplayed = false;
+
+    try {
+        if (!currentConversationId) {
+            const data = await api("/api/conversations", {
+                method: "POST",
+                body: JSON.stringify({
+                    title: "New chat"
+                })
+            });
+
+            currentConversationId = data.conversation.id;
+            conversations.unshift(data.conversation);
+            renderHistory();
+        }
+
+        const displayMessage = [
+            message || "Please examine the attached file(s).",
+            ...files.map(file => `[Attached: ${file.name}]`)
+        ].join("\n");
+
+        addMessage("user", displayMessage);
+        userMessageDisplayed = true;
+
+        messageInput.value = "";
+        messageInput.style.height = "auto";
+
+        addTyping();
+
+        let result;
+
+        if (files.length === 0 && !webSearchEnabled) {
+            // Plain chat: stream the reply while it is written.
+            let streamView = null;
+
+            try {
+                result = await streamChatMessage(message, fullText => {
+                    if (!streamView) {
+                        removeTyping();
+                        streamView = addStreamingMessage();
+                    }
+
+                    streamView.update(fullText);
+                });
+            } catch (error) {
+                streamView?.cancel();
+                throw error;
+            }
+
+            if (!streamView) {
+                removeTyping();
+                streamView = addStreamingMessage();
+            }
+
+            streamView.finish(result.reply);
+        } else {
+            // Files attached: use the regular one-shot request.
+            const formData = new FormData();
+
+            formData.append("conversationId", currentConversationId);
+            formData.append("message", message);
+            formData.append("model", modelSelect.value);
+            formData.append("webSearch", webSearchEnabled ? "true" : "false");
+
+            files.forEach(file => {
+                formData.append("files", file, file.name);
+            });
+
+            result = await api("/api/chat", {
+                method: "POST",
+                body: formData
+            });
+
+            removeTyping();
+
+            addMessage(
+                "assistant",
+                result.assistantMessage.content
+            );
+        }
+
+        selectedFiles = [];
+        renderAttachmentPreview();
+
+        const conversation = conversations.find(
+            item => item.id === currentConversationId
+        );
+
+        if (conversation) {
+            conversation.title = result.conversationTitle;
+        }
+
+        chatTitle.textContent = result.conversationTitle;
+
+        await loadConversations();
+        loadUsage();
+        setTimeout(loadUsage, 800);
+        renderHistory();
+        scrollToBottom();
+
+    } catch (error) {
+        removeTyping();
+
+        if (userMessageDisplayed) {
+            showToast(
+                `${error.message} Your message was not confirmed as processed.`
+            );
+        } else {
+            showToast(error.message);
+        }
+    } finally {
+        isSending = false;
+
+        sendBtn.disabled = false;
+        attachBtn.disabled = false;
+        webSearchBtn.disabled = false;
+        fileInput.disabled = false;
+        messageInput.disabled = false;
+        modelSelect.disabled = modelSelect.options.length === 0;
+
+        messageInput.focus();
+    }
+}
+
+/* EVENT LISTENERS */
+
+webSearchBtn.addEventListener("click", () => {
+    webSearchEnabled = !webSearchEnabled;
+    webSearchBtn.classList.toggle("active", webSearchEnabled);
+    webSearchBtn.setAttribute("aria-pressed", String(webSearchEnabled));
+
+    showToast(
+        webSearchEnabled
+            ? "Web search is ON for your next message."
+            : "Web search is OFF."
+    );
+});
+
+chatForm.addEventListener("submit", event => {
+    event.preventDefault();
+    sendMessage(messageInput.value);
+});
+
+messageInput.addEventListener("input", () => {
+    messageInput.style.height = "auto";
+
+    messageInput.style.height =
+        Math.min(messageInput.scrollHeight, 145) + "px";
+});
+
+messageInput.addEventListener("keydown", event => {
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey &&
+        !event.isComposing
+    ) {
+        event.preventDefault();
+        chatForm.requestSubmit();
+    }
+});
+
+document.getElementById("newChatBtn").addEventListener(
+    "click",
+    createNewChat
+);
+
+document.getElementById("logoutBtn").addEventListener(
+    "click",
+    async () => {
+        try {
+            await api("/logout", {
+                method: "POST"
+            });
+
+            window.location.replace("/login");
+        } catch {
+            window.location.replace("/logout");
+        }
+    }
+);
+
+document.querySelectorAll(".suggestion").forEach(button => {
+    button.addEventListener("click", () => {
+        sendMessage(button.dataset.prompt);
+    });
+});
+
+/* INITIALIZATION */
+
+/* PLAN AND USAGE */
+
+const PLAN_NAMES = {
+    free: "Free",
+    pro: "Pro",
+    premium: "Premium"
+};
+
+async function loadUsage() {
+    try {
+        const usage = await api("/api/usage", { cache: "no-store" });
+
+        const planName = PLAN_NAMES[usage.plan] || "Free";
+
+        usagePlan.textContent = planName + " plan";
+        usageCount.textContent = usage.used + " / " + usage.limit + " today";
+
+        const percent = usage.limit > 0
+            ? Math.min(100, Math.round((usage.used / usage.limit) * 100))
+            : 0;
+
+        usageFill.style.width = percent + "%";
+        usageFill.classList.toggle(
+            "low",
+            usage.remaining > 0 && usage.remaining <= 5
+        );
+        usageFill.classList.toggle("empty", usage.remaining <= 0);
+
+        usageCaption.textContent = usage.remaining > 0
+            ? usage.remaining + " messages left · resets at midnight"
+            : "Daily limit reached · resets at midnight";
+
+        if (usage.plan !== "free" && usage.planExpiresAt) {
+            const until = new Date(usage.planExpiresAt)
+                .toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short"
+                });
+
+            usageCaption.textContent +=
+                " · " + planName + " until " + until;
+        }
+
+        currentPlanKey = usage.plan;
+        updateUpgradeButton();
+
+        usageBox.hidden = false;
+    } catch {
+        // The usage display is decoration: never break the app over it.
+    }
+}
+
+/* BILLING — RAZORPAY UPGRADES */
+
+let billingInfo = null;
+let currentPlanKey = "free";
+let currentUserEmail = "";
+let paying = false;
+
+function updateUpgradeButton() {
+    const show = Boolean(
+        billingInfo &&
+        billingInfo.enabled &&
+        currentPlanKey !== "premium"
+    );
+
+    upgradeBtn.hidden = !show;
+}
+
+async function loadBilling() {
+    try {
+        billingInfo = await api("/api/billing/plans", {
+            cache: "no-store"
+        });
+    } catch {
+        billingInfo = null;
+    }
+
+    updateUpgradeButton();
+}
+
+function renderPlanCards() {
+    planCards.replaceChildren();
+
+    for (const plan of billingInfo.plans) {
+        const isCurrent = plan.key === billingInfo.currentPlan;
+
+        const card = document.createElement("div");
+        card.className = "plan-card" + (isCurrent ? " current" : "");
+
+        const top = document.createElement("div");
+        top.className = "plan-card-top";
+
+        const name = document.createElement("div");
+        name.className = "plan-card-name";
+        name.textContent = plan.name + (isCurrent ? " · current plan" : "");
+
+        const price = document.createElement("div");
+        price.className = "plan-card-price";
+        price.innerHTML = "₹" + plan.priceInr + " <span>/ 30 days</span>";
+
+        top.append(name, price);
+
+        const detail = document.createElement("div");
+        detail.className = "plan-card-detail";
+        detail.textContent = plan.dailyMessages + " messages per day";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = isCurrent
+            ? "Extend by 30 days"
+            : "Upgrade to " + plan.name;
+
+        button.addEventListener("click", () =>
+            startUpgrade(plan.key, button)
+        );
+
+        card.append(top, detail, button);
+        planCards.appendChild(card);
+    }
+}
+
+function openPlans() {
+    if (!billingInfo || !billingInfo.enabled) {
+        return;
+    }
+
+    renderPlanCards();
+    plansModal.hidden = false;
+}
+
+function closePlans() {
+    plansModal.hidden = true;
+}
+
+upgradeBtn.addEventListener("click", openPlans);
+plansClose.addEventListener("click", closePlans);
+
+plansModal.addEventListener("click", event => {
+    if (event.target === plansModal) {
+        closePlans();
+    }
+});
+
+async function startUpgrade(planKey, button) {
+    if (paying) {
+        return;
+    }
+
+    if (typeof Razorpay === "undefined") {
+        showToast(
+            "The payment library could not load. Check your connection and try again."
+        );
+        return;
+    }
+
+    paying = true;
+    button.disabled = true;
+    button.textContent = "Starting payment...";
+
+    try {
+        const order = await api("/api/billing/create-order", {
+            method: "POST",
+            body: JSON.stringify({ plan: planKey })
+        });
+
+        const checkout = new Razorpay({
+            key: order.keyId,
+            amount: order.amount,
+            currency: order.currency,
+            name: "ConvoGen AI",
+            description: order.planName + " plan · 30 days",
+            order_id: order.orderId,
+            prefill: { email: currentUserEmail },
+            theme: { color: "#13a99b" },
+            handler: async response => {
+                try {
+                    const result = await api("/api/billing/verify", {
+                        method: "POST",
+                        body: JSON.stringify(response)
+                    });
+
+                    closePlans();
+
+                    showToast(
+                        "Welcome to " +
+                        (PLAN_NAMES[result.plan] || result.plan) +
+                        "! Your upgrade is active."
+                    );
+
+                    loadUsage();
+                    loadBilling();
+                } catch (error) {
+                    showToast(error.message);
+                }
+            },
+            modal: {
+                ondismiss: () => {
+                    renderPlanCards();
+                    showToast(
+                        "Payment window closed. Nothing was charged."
+                    );
+                }
+            }
+        });
+
+        checkout.on("payment.failed", response => {
+            const description =
+                (response.error && response.error.description) ||
+                "Payment failed. Please try again.";
+
+            showToast(description);
+        });
+
+        checkout.open();
+    } catch (error) {
+        showToast(error.message);
+        renderPlanCards();
+    } finally {
+        paying = false;
+        button.disabled = false;
+    }
+}
+
+async function initialize() {
+    initializeTheme();
+    refreshIcons();
+
+    try {
+        const data = await api("/api/me");
+
+        const displayName =
+            data.user.fullName ||
+            data.user.email ||
+            "My account";
+
+        currentUserEmail = data.user.email || "";
+
+        userEmail.textContent = displayName;
+
+        userAvatar.textContent = displayName
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(part => part.charAt(0).toUpperCase())
+            .join("") || "CG";
+
+        await loadModels();
+        await loadConversations();
+        loadUsage();
+        loadBilling();
+
+        if (conversations.length) {
+            await loadConversation(conversations[0].id);
+        } else {
+            showWelcome();
+        }
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+/* H-ADE — HARDWARE STUDIO (Integration I3) */
+
+const hadeNavBtn = document.getElementById("hadeNavBtn");
+const hadeArea = document.getElementById("hadeArea");
+const composerWrap = document.getElementById("composerWrap");
+const hadeUsage = document.getElementById("hadeUsage");
+const hadeRequirement = document.getElementById("hadeRequirement");
+const hadeGenerateBtn = document.getElementById("hadeGenerateBtn");
+const hadeStatusCard = document.getElementById("hadeStatusCard");
+const hadePhase = document.getElementById("hadePhase");
+const hadeDots = document.getElementById("hadeDots");
+const hadeLog = document.getElementById("hadeLog");
+const hadeResultCard = document.getElementById("hadeResultCard");
+const hadeBadge = document.getElementById("hadeBadge");
+const hadeResultMeta = document.getElementById("hadeResultMeta");
+const hadeResultReq = document.getElementById("hadeResultReq");
+const hadeResultError = document.getElementById("hadeResultError");
+const hadeQuestions = document.getElementById("hadeQuestions");
+const hadeQuestionsList = document.getElementById("hadeQuestionsList");
+const hadeArchetype = document.getElementById("hadeArchetype");
+const hadeAnswers = document.getElementById("hadeAnswers");
+const hadeAnswerFields = document.getElementById("hadeAnswerFields");
+const hadeAnswerBtn = document.getElementById("hadeAnswerBtn");
+const hadeFilesTitle = document.getElementById("hadeFilesTitle");
+const hadePinWrap = document.getElementById("hadePinWrap");
+const hadePinBody = document.getElementById("hadePinBody");
+const hadeSpecLine = document.getElementById("hadeSpecLine");
+const hadeFiles = document.getElementById("hadeFiles");
+const hadeDownloadBtn = document.getElementById("hadeDownloadBtn");
+const hadePreview = document.getElementById("hadePreview");
+const hadePreviewName = document.getElementById("hadePreviewName");
+const hadePreviewBody = document.getElementById("hadePreviewBody");
+const hadePreviewClose = document.getElementById("hadePreviewClose");
+const hadeHistory = document.getElementById("hadeHistory");
+
+let hadePollTimer = null;
+let hadePollFailures = 0;
+let hadeSavedTitle = null;
+let hadeLoadedOnce = false;
+
+function showHadeView() {
+    if (hadeArea.hidden) {
+        hadeSavedTitle = chatTitle.textContent;
+    }
+
+    chatArea.hidden = true;
+    composerWrap.hidden = true;
+    hadeArea.hidden = false;
+    chatTitle.textContent = "Hardware Studio";
+    hadeNavBtn.classList.add("active");
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+
+    if (!hadeLoadedOnce) {
+        hadeLoadedOnce = true;
+        loadHadeHistory();
+    }
+
+    loadHadeUsageChip();
+}
+
+function showChatView() {
+    if (hadeArea.hidden) return;
+
+    hadeArea.hidden = true;
+    chatArea.hidden = false;
+    composerWrap.hidden = false;
+    hadeNavBtn.classList.remove("active");
+
+    if (chatTitle.textContent === "Hardware Studio" && hadeSavedTitle) {
+        chatTitle.textContent = hadeSavedTitle;
+    }
+}
+
+hadeNavBtn.addEventListener("click", showHadeView);
+
+document
+    .getElementById("newChatBtn")
+    .addEventListener("click", showChatView);
+
+historyList.addEventListener("click", showChatView);
+
+async function loadHadeUsageChip() {
+    try {
+        const usage = await api("/api/usage", { cache: "no-store" });
+
+        if (usage && usage.hade) {
+            hadeUsage.textContent =
+                "Hardware: " + usage.hade.used + " / " +
+                usage.hade.limit + " today";
+            hadeUsage.hidden = false;
+        }
+    } catch {
+        // The chip is decoration — never break the view over it.
+    }
+}
+
+document.querySelectorAll("[data-hade-example]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+        hadeRequirement.value = chip.getAttribute("data-hade-example");
+        hadeRequirement.focus();
+    });
+});
+
+function renderHadeDots(attempt, maxAttempts, phase) {
+    hadeDots.textContent = "";
+
+    const total = maxAttempts || 5;
+    const done = phase === "generating"
+        ? Math.max(0, (attempt || 1) - 1)
+        : (attempt || 0);
+
+    for (let i = 1; i <= total; i++) {
+        const dot = document.createElement("span");
+        dot.className = "hade-dot";
+
+        if (i <= done) {
+            dot.classList.add("done");
+        } else if (phase === "generating" && i === attempt) {
+            dot.classList.add("current");
+        }
+
+        hadeDots.appendChild(dot);
+    }
+}
+
+function hadePhaseText(project) {
+    const attempt = project.attempt || 0;
+    const max = project.maxAttempts || 5;
+
+    switch (project.phase) {
+        case "designing":
+            return "Designing the specification from your " +
+                "description…";
+        case "clarifying":
+            return "The description needs clarification…";
+        case "generating":
+            return "Generating firmware — attempt " + attempt +
+                " of " + max + "…";
+        case "repairing":
+            return "The tests failed — the AI is repairing its " +
+                "firmware…";
+        case "finalizing":
+            return "Tests passed — packing your project…";
+        case "queued":
+            return "Queued…";
+        default:
+            return "Working…";
+    }
+}
+
+function renderHadeStatus(project) {
+    hadeStatusCard.hidden = false;
+    hadePhase.textContent = hadePhaseText(project);
+    renderHadeDots(project.attempt, project.maxAttempts, project.phase);
+
+    const lines = project.log || [];
+    hadeLog.textContent = lines.length
+        ? lines.join("\n")
+        : "Starting the engine…";
+    hadeLog.scrollTop = hadeLog.scrollHeight;
+}
+
+function stopHadePoll() {
+    if (hadePollTimer) {
+        clearTimeout(hadePollTimer);
+        hadePollTimer = null;
+    }
+}
+
+function pollHadeProject(id) {
+    stopHadePoll();
+    hadePollFailures = 0;
+
+    const tick = async () => {
+        try {
+            const project = await api(
+                "/api/hade/projects/" + id,
+                { cache: "no-store" }
+            );
+
+            hadePollFailures = 0;
+
+            if (project.status === "running") {
+                renderHadeStatus(project);
+                hadePollTimer = setTimeout(tick, 3000);
+                return;
+            }
+
+            hadeStatusCard.hidden = true;
+            renderHadeResult(project);
+            loadHadeHistory();
+            loadHadeUsageChip();
+
+            if (hadeArea.hidden) {
+                showToast(
+                    "Your hardware project finished — see Hardware Studio."
+                );
+            }
+        } catch (error) {
+            hadePollFailures += 1;
+
+            if (hadePollFailures <= 10) {
+                hadePollTimer = setTimeout(tick, 5000);
+            } else {
+                hadeStatusCard.hidden = true;
+                showToast(
+                    "Lost contact while generating. Check your " +
+                    "hardware projects list in a moment."
+                );
+            }
+        }
+    };
+
+    tick();
+}
+
+async function attachToRunningHade() {
+    try {
+        const data = await api("/api/hade/projects", {
+            cache: "no-store"
+        });
+
+        const running = (data.projects || []).find(
+            (p) => p.status === "running"
+        );
+
+        if (running) {
+            hadeResultCard.hidden = true;
+            hadeStatusCard.hidden = false;
+            pollHadeProject(running.id);
+        }
+    } catch {
+        // Nothing to attach to — the original toast already explained.
+    }
+}
+
+async function hadeGenerate() {
+    const requirement = hadeRequirement.value.trim();
+
+    if (requirement.length < 10) {
+        showToast(
+            "Please describe your project in a little more detail."
+        );
+        return;
+    }
+
+    hadeGenerateBtn.disabled = true;
+    hadeResultCard.hidden = true;
+    hadePreview.hidden = true;
+    hadeStatusCard.hidden = false;
+    hadePhase.textContent = "Starting the engine…";
+    hadeLog.textContent = "";
+    renderHadeDots(0, 5, "queued");
+
+    try {
+        const data = await api("/api/hade/projects", {
+            method: "POST",
+            body: JSON.stringify({ requirement })
+        });
+
+        pollHadeProject(data.id);
+        loadHadeHistory();
+    } catch (error) {
+        hadeStatusCard.hidden = true;
+        showToast(error.message);
+
+        if (/already being generated/i.test(error.message)) {
+            attachToRunningHade();
+        }
+    } finally {
+        hadeGenerateBtn.disabled = false;
+    }
+}
+
+hadeGenerateBtn.addEventListener("click", hadeGenerate);
+
+function hadeStatusPill(status) {
+    const pill = document.createElement("span");
+    pill.className = "hade-pill " + status;
+    pill.textContent = {
+        running: "Running",
+        passed: "Validated",
+        failed: "Generated",
+        error: "Failed",
+        clarification_needed: "Needs details"
+    }[status] || status;
+    return pill;
+}
+
+async function loadHadeHistory() {
+    try {
+        const data = await api("/api/hade/projects", {
+            cache: "no-store"
+        });
+
+        const projects = data.projects || [];
+        hadeHistory.textContent = "";
+
+        if (!projects.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty-history";
+            empty.textContent =
+                "No hardware projects yet — generate your first one above.";
+            hadeHistory.appendChild(empty);
+            return;
+        }
+
+        projects.forEach((project) => {
+            const row = document.createElement("button");
+            row.type = "button";
+            row.className = "hade-history-row";
+
+            const main = document.createElement("div");
+            main.className = "hade-history-main";
+
+            const req = document.createElement("div");
+            req.className = "hade-history-req";
+            req.textContent = project.requirement;
+
+            const date = document.createElement("div");
+            date.className = "hade-history-date";
+            date.textContent = new Date(project.created_at)
+                .toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit"
+                });
+
+            main.appendChild(req);
+            main.appendChild(date);
+            row.appendChild(main);
+            row.appendChild(hadeStatusPill(project.status));
+            row.addEventListener("click", () => {
+                openHadeProject(project.id);
+            });
+
+            hadeHistory.appendChild(row);
+        });
+    } catch {
+        hadeHistory.textContent = "";
+        const empty = document.createElement("div");
+        empty.className = "empty-history";
+        empty.textContent = "Could not load your hardware projects.";
+        hadeHistory.appendChild(empty);
+    }
+}
+
+async function openHadeProject(id) {
+    try {
+        const project = await api(
+            "/api/hade/projects/" + id,
+            { cache: "no-store" }
+        );
+
+        hadeArea.scrollTop = 0;
+
+        if (project.status === "running") {
+            hadeResultCard.hidden = true;
+            renderHadeStatus(project);
+            pollHadeProject(id);
+        } else {
+            hadeStatusCard.hidden = true;
+            renderHadeResult(project);
+        }
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+// I7.2: archetype labels, slot answer phrasing and the
+// answer-in-place flow. The phrases are written so the engine's
+// own slot extraction recognises them on resubmission — the
+// answers ride inside the requirement text, through the same
+// classifier + analyzer as any description.
+const HADE_ARCHETYPE_LABELS = {
+    greenhouse: "Smart greenhouse",
+    industrial_monitoring: "Industrial monitoring",
+    fire_safety: "Fire detection",
+    parking: "Smart parking",
+    irrigation: "Smart irrigation",
+    security: "Home security",
+    street_lighting: "Street lighting",
+    custom: "Custom project"
+};
+
+const HADE_OPTION_LABELS = {
+    ultrasonic: "Ultrasonic distance sensor",
+    ir: "IR obstacle sensor",
+    temperature: "Temperature rise",
+    smoke_gas: "Smoke / gas sensor",
+    buzzer: "Buzzer (sound)",
+    led: "LED (light)",
+    both: "Both",
+    one: "One slot",
+    multiple: "Multiple slots",
+    relay: "Relay module"
+};
+
+const HADE_SLOT_PHRASES = {
+    temp_threshold: (v) => "temperature threshold " + v + "°C",
+    humidity_threshold: (v) => "humidity threshold " + v + "%",
+    soil_threshold: (v) => "soil moisture threshold " + v + "%",
+    light_threshold: (v) => "darkness threshold " + v + "%",
+    detection_method: {
+        ultrasonic: "vehicle detection by ultrasonic distance sensor",
+        ir: "vehicle detection by infrared IR obstacle sensor",
+        temperature: "fire detection by temperature",
+        smoke_gas: "fire detection by smoke and gas sensor"
+    },
+    alarm_actuator: {
+        buzzer: "alarm with a buzzer",
+        led: "alarm with an LED",
+        both: "alarm with both an LED and a buzzer"
+    },
+    slot_count: {
+        one: "monitor one slot",
+        multiple: "monitor multiple parking slots"
+    },
+    pump_actuator: { relay: "pump controlled by the relay" },
+    lamp_actuator: {
+        relay: "switch a real lamp with the relay",
+        led: "switch an LED"
+    }
+};
+
+function hadeSlotPhrase(slot, value) {
+    const entry = HADE_SLOT_PHRASES[slot.id];
+    if (typeof entry === "function") return entry(value);
+    if (entry && entry[value]) return entry[value];
+    return slot.id + ": " + value;
+}
+
+let hadeAnswerProjectId = null;
+let hadeAnswerRequirement = "";
+let hadeAnswerSlots = [];
+
+function renderHadeAnswers(project) {
+    const slots = project.slots || [];
+    hadeAnswerSlots = slots;
+    hadeAnswerFields.textContent = "";
+
+    if (!slots.length) {
+        hadeAnswers.hidden = true;
+        return;
+    }
+
+    let hasAnswerable = false;
+
+    slots.forEach((slot) => {
+        const row = document.createElement("div");
+        row.className = "hade-answer-row";
+
+        const label = document.createElement("label");
+        label.textContent = slot.question;
+        row.appendChild(label);
+
+        if (slot.kind === "registry") {
+            const chip = document.createElement("span");
+            chip.className = "hade-answer-soon";
+            chip.textContent = slot.milestone
+                ? "Coming in " + slot.milestone
+                : "Not scheduled yet";
+            row.appendChild(chip);
+        } else if (slot.kind === "number") {
+            hasAnswerable = true;
+            const input = document.createElement("input");
+            input.type = "number";
+            input.step = "any";
+            input.placeholder = "Type a number";
+            input.dataset.slotId = slot.id;
+            row.appendChild(input);
+        } else if (slot.kind === "decision") {
+            hasAnswerable = true;
+            const select = document.createElement("select");
+            select.dataset.slotId = slot.id;
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "Choose…";
+            select.appendChild(placeholder);
+            (slot.options || []).forEach((option) => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent =
+                    HADE_OPTION_LABELS[option] || option;
+                select.appendChild(opt);
+            });
+            row.appendChild(select);
+        }
+
+        hadeAnswerFields.appendChild(row);
+    });
+
+    hadeAnswerBtn.disabled = !hasAnswerable;
+    hadeAnswerBtn.style.display = hasAnswerable ? "" : "none";
+    hadeAnswers.hidden = false;
+    hadeAnswerProjectId = project.id;
+    hadeAnswerRequirement = project.requirement || "";
+}
+
+async function hadeSubmitAnswers() {
+    if (!hadeAnswerProjectId) return;
+
+    const phrases = [];
+
+    hadeAnswerFields
+        .querySelectorAll("[data-slot-id]")
+        .forEach((field) => {
+            const value = field.value.trim();
+            if (!value) return;
+            const slot = hadeAnswerSlots.find(
+                (s) => s.id === field.dataset.slotId
+            );
+            if (slot) phrases.push(hadeSlotPhrase(slot, value));
+        });
+
+    if (!phrases.length) {
+        showToast("Answer at least one question first.");
+        return;
+    }
+
+    const combined = hadeAnswerRequirement +
+        "\nAdditional details: " + phrases.join("; ") + ".";
+
+    if (combined.length > 1000) {
+        showToast(
+            "That gets too long — please edit the description " +
+            "at the top instead."
+        );
+        return;
+    }
+
+    hadeAnswerBtn.disabled = true;
+    hadeResultCard.hidden = true;
+    hadePreview.hidden = true;
+    hadeStatusCard.hidden = false;
+    hadePhase.textContent = "Starting the engine…";
+    hadeLog.textContent = "";
+    renderHadeDots(0, 5, "queued");
+
+    try {
+        const data = await api("/api/hade/projects", {
+            method: "POST",
+            body: JSON.stringify({
+                requirement: combined,
+                resubmitOf: hadeAnswerProjectId
+            })
+        });
+
+        pollHadeProject(data.id);
+        loadHadeHistory();
+    } catch (error) {
+        hadeStatusCard.hidden = true;
+        showToast(error.message);
+
+        if (/already being generated/i.test(error.message)) {
+            attachToRunningHade();
+        }
+    } finally {
+        hadeAnswerBtn.disabled = false;
+    }
+}
+
+hadeAnswerBtn.addEventListener("click", hadeSubmitAnswers);
+
+function renderHadeResult(project) {
+    hadeResultCard.hidden = false;
+    hadePreview.hidden = true;
+
+    const isClarification = project.status === "clarification_needed";
+
+    if (project.status === "passed") {
+        hadeBadge.className = "hade-badge ok";
+        hadeBadge.textContent = "DIGITALLY VALIDATED";
+    } else if (project.status === "failed") {
+        hadeBadge.className = "hade-badge warn";
+        hadeBadge.textContent = "GENERATED ONLY — TESTS DID NOT PASS";
+    } else if (isClarification) {
+        hadeBadge.className = "hade-badge info";
+        hadeBadge.textContent = "NEEDS DETAILS — NOTHING WAS GUESSED";
+    } else {
+        hadeBadge.className = "hade-badge bad";
+        hadeBadge.textContent = "GENERATION FAILED";
+    }
+
+    // I7.2: the engine's archetype stamp, as a project-type label.
+    const archetypeLabel = HADE_ARCHETYPE_LABELS[project.archetype];
+
+    if (archetypeLabel) {
+        hadeArchetype.textContent = archetypeLabel;
+        hadeArchetype.hidden = false;
+    } else {
+        hadeArchetype.hidden = true;
+    }
+
+    const when = new Date(project.created_at).toLocaleString("en-IN", {
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+
+    hadeResultMeta.textContent =
+        "Attempts used: " + (project.attempts || 0) + " · " + when;
+    hadeResultReq.textContent = project.requirement;
+
+    if (project.error) {
+        hadeResultError.textContent = project.error;
+        hadeResultError.hidden = false;
+    } else {
+        hadeResultError.hidden = true;
+    }
+
+    // Clarification: show the engine's questions, hide the
+    // (empty) files section — there is no bundle for a question.
+    if (isClarification) {
+        const questions = project.questions || [];
+        hadeQuestionsList.textContent = "";
+
+        if (questions.length) {
+            questions.forEach((question) => {
+                const li = document.createElement("li");
+                li.textContent = question;
+                hadeQuestionsList.appendChild(li);
+            });
+        } else {
+            const li = document.createElement("li");
+            li.textContent =
+                "The description is missing details (for example " +
+                "a threshold number) or asks for parts outside " +
+                "the supported palette.";
+            hadeQuestionsList.appendChild(li);
+        }
+
+        hadeQuestions.hidden = false;
+        renderHadeAnswers(project);
+    } else {
+        hadeQuestions.hidden = true;
+        hadeAnswers.hidden = true;
+    }
+
+    hadeFilesTitle.style.display = isClarification ? "none" : "";
+
+    // Files + previews.
+    const files = project.files || [];
+    hadeFiles.textContent = "";
+
+    files
+        .filter((name) => name !== "project.zip")
+        .forEach((name) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "hade-file-btn";
+            btn.textContent = name;
+            btn.addEventListener("click", () => {
+                previewHadeFile(project.id, name);
+            });
+            hadeFiles.appendChild(btn);
+        });
+
+    if (files.includes("project.zip")) {
+        hadeDownloadBtn.href = "/api/hade/projects/" + project.id +
+            "/download";
+        hadeDownloadBtn.style.display = "";
+    } else {
+        hadeDownloadBtn.style.display = "none";
+    }
+
+    // Pin map from hardware.json (best effort — the rest of the
+    // card must still render if this fetch fails).
+    hadePinWrap.hidden = true;
+    hadeSpecLine.hidden = true;
+
+    if (files.includes("hardware.json")) {
+        loadHadePinMap(project.id, files);
+    }
+}
+
+async function loadHadePinMap(projectId, files) {
+    try {
+        const response = await fetch(
+            "/api/hade/projects/" + projectId + "/files/hardware.json",
+            { credentials: "same-origin" }
+        );
+
+        if (!response.ok) return;
+
+        const spec = await response.json();
+
+        // I7.2: per-component purposes live in project.json (same
+        // component order as hardware.json — both derive from the
+        // spec). Best effort: the map renders without them.
+        let purposes = [];
+
+        if ((files || []).includes("project.json")) {
+            try {
+                const pResponse = await fetch(
+                    "/api/hade/projects/" + projectId +
+                        "/files/project.json",
+                    { credentials: "same-origin" }
+                );
+
+                if (pResponse.ok) {
+                    const projectSpec = await pResponse.json();
+                    purposes = (projectSpec.components || []).map(
+                        (c) => c.purpose || ""
+                    );
+                }
+            } catch {
+                // Purposes are an enhancement only.
+            }
+        }
+
+        hadePinBody.textContent = "";
+
+        (spec.components || []).forEach((component, index) => {
+            const conn = component.connection || {};
+            const pin = conn.data_pin !== undefined
+                ? conn.data_pin
+                : conn.control_pin;
+
+            const tr = document.createElement("tr");
+
+            const nameTd = document.createElement("td");
+            nameTd.textContent = component.name;
+
+            if (purposes[index]) {
+                const purposeDiv = document.createElement("div");
+                purposeDiv.className = "hade-purpose";
+                purposeDiv.textContent = purposes[index];
+                nameTd.appendChild(purposeDiv);
+            }
+
+            tr.appendChild(nameTd);
+
+            [component.role,
+             pin !== undefined ? "GPIO " + pin : "—",
+             component.notes || ""].forEach((value) => {
+                const td = document.createElement("td");
+                td.textContent = value;
+                tr.appendChild(td);
+            });
+
+            hadePinBody.appendChild(tr);
+        });
+
+        if (hadePinBody.children.length) {
+            hadePinWrap.hidden = false;
+        }
+
+        if (spec.parameters) {
+            const parts = [];
+
+            if (typeof spec.parameters.threshold_c === "number") {
+                parts.push(
+                    "Threshold: " + spec.parameters.threshold_c + " °C"
+                );
+            }
+
+            parts.push(
+                "Read interval: " + spec.parameters.interval_s + " s"
+            );
+            parts.push("Board: " + (spec.board || "ESP32"));
+            hadeSpecLine.textContent = parts.join(" · ");
+            hadeSpecLine.hidden = false;
+        }
+    } catch {
+        // Pin map is an enhancement — the card already shows the result.
+    }
+}
+
+async function previewHadeFile(projectId, name) {
+    try {
+        const response = await fetch(
+            "/api/hade/projects/" + projectId + "/files/" + name,
+            { credentials: "same-origin" }
+        );
+
+        if (!response.ok) {
+            throw new Error("Could not load that file.");
+        }
+
+        let text = await response.text();
+
+        if (name.endsWith(".json")) {
+            try {
+                text = JSON.stringify(JSON.parse(text), null, 2);
+            } catch {
+                // Show the raw text if it is not valid JSON.
+            }
+        }
+
+        hadePreviewName.textContent = name;
+        hadePreviewBody.textContent = text;
+        hadePreview.hidden = false;
+        hadePreview.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+hadePreviewClose.addEventListener("click", () => {
+    hadePreview.hidden = true;
+});
+
+initialize();
+</script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071827">
+  <title>Login | ConvoGen AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      color: #eaf4f7;
+      background: linear-gradient(135deg, #071827, #0b2638);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 430px;
+      padding: 38px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      background: #102b3d;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      display: block;
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
+      border-radius: 16px;
+      margin: 0 auto 18px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #a9bec9;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 8px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #365466;
+      border-radius: 8px;
+      outline: none;
+      background: #091f2e;
+      color: white;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #20c5b5;
+      box-shadow: 0 0 0 2px rgba(32,197,181,0.12);
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-button {
+      margin-top: 22px;
+      color: #06232d;
+      background: #20c5b5;
+    }
+
+    .google-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      color: white;
+      background: #193b50;
+      border: 1px solid #456477;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 23px 0;
+      color: #91aab7;
+      font-size: 13px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #365466;
+    }
+
+    .forgot-password {
+      margin-top: 12px;
+      text-align: right;
+      font-size: 13px;
+    }
+
+    .links {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 2;
+      color: #a9bec9;
+    }
+
+    a {
+      color: #20c5b5;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #status {
+      display: none;
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 7px;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    #status.info {
+      display: block;
+      color: #d5edff;
+      background: #173e57;
+    }
+
+    #status.error {
+      display: block;
+      color: #ffd4d4;
+      background: #542b36;
+    }
+
+    #status.success {
+      display: block;
+      color: #c9fff0;
+      background: #16483f;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 28px 22px;
+      }
+    }
+  </style>
+<link rel="icon" type="image/webp" href="/convogen-logo.webp">
+</head>
+
+<body>
+
+  <main class="login-container">
+
+    <img
+      class="logo"
+      src="/convogen-logo.webp"
+      alt="ConvoGen AI logo"
+    >
+
+    <h1>Welcome Back</h1>
+
+    <p class="subtitle">
+      Sign in to continue to ConvoGen AI
+    </p>
+
+    <!-- EMAIL LOGIN FORM -->
+
+    <form id="loginForm">
+
+      <label for="email">Email address</label>
+
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="Enter your email"
+        autocomplete="email"
+        required
+      >
+
+      <label for="password">Password</label>
+
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button
+        type="submit"
+        class="login-button"
+        id="loginButton"
+      >
+        Login
+      </button>
+
+    </form>
+
+    <div class="forgot-password">
+      <a href="/forgot-password">
+        Forgot password?
+      </a>
+    </div>
+
+    <div class="divider">OR</div>
+
+    <!-- GOOGLE LOGIN BUTTON -->
+
+    <button
+      type="button"
+      class="google-button"
+      id="googleLoginButton"
+    >
+
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 48 48"
+        aria-hidden="true"
+      >
+        <path
+          fill="#EA4335"
+          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+        />
+
+        <path
+          fill="#4285F4"
+          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.27 5.64c4.25-3.92 6.49-9.71 6.49-17.29z"
+        />
+
+        <path
+          fill="#FBBC05"
+          d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.55 2.56 10.78l7.97-6.19z"
+        />
+
+        <path
+          fill="#34A853"
+          d="M24 48c6.48 0 11.93-2.13 15.91-5.81l-7.27-5.64c-2.02 1.35-4.6 2.15-8.64 2.15-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+        />
+      </svg>
+
+      Continue with Google
+
+    </button>
+
+    <!-- STATUS MESSAGE -->
+
+    <div
+      id="status"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <div class="links">
+      Don't have an account?
+      <a href="/">Create an account</a>
+    </div>
+
+  </main>
+
+  <!-- SUPABASE BROWSER SDK -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", initializeLogin);
+
+    function initializeLogin() {
+
+      const statusBox = document.getElementById("status");
+      const loginForm = document.getElementById("loginForm");
+      const loginButton = document.getElementById("loginButton");
+      const googleButton = document.getElementById("googleLoginButton");
+
+      function showStatus(message, type) {
+        statusBox.textContent = message;
+        statusBox.className = type;
+      }
+
+      // CHECK SUPABASE LIBRARY
+
+      if (!window.supabase) {
+        showStatus(
+          "Supabase library failed to load. Check your internet connection.",
+          "error"
+        );
+        return;
+      }
+
+      const SUPABASE_URL =
+        "https://rzeqerwqexhwapicubxz.supabase.co";
+
+      // ENTER YOUR SUPABASE PUBLISHABLE KEY
+
+      const SUPABASE_PUBLISHABLE_KEY =
+        "sb_publishable__O418iD2yMy6aFdDBrgj4g_-5_-clD0";
+
+      if (
+        !SUPABASE_PUBLISHABLE_KEY ||
+        SUPABASE_PUBLISHABLE_KEY === "YOUR_ACTUAL_SUPABASE_PUBLISHABLE_KEY"
+      ) {
+        showStatus(
+          "Please add your Supabase publishable key in login.html.",
+          "error"
+        );
+        return;
+      }
+
+      // INITIALIZE SUPABASE
+
+      let supabaseClient;
+
+      try {
+
+        supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_PUBLISHABLE_KEY,
+          {
+            auth: {
+              flowType: "pkce",
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: false
+            }
+          }
+        );
+
+      } catch (error) {
+
+        showStatus(
+          "Supabase initialization failed: " + error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      console.log("ConvoGen AI login initialized.");
+
+      // EMAIL AND PASSWORD LOGIN
+
+      loginForm.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+        const password =
+          document.getElementById("password").value;
+
+        loginButton.disabled = true;
+        loginButton.textContent = "Signing in...";
+
+        showStatus(
+          "Checking your login details...",
+          "info"
+        );
+
+        try {
+
+          const response = await fetch("/login", {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+
+            credentials: "same-origin",
+
+            body: new URLSearchParams({
+              email: email,
+              password: password
+            })
+          });
+
+          const result = await response.json().catch(function() {
+            return {};
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              result.error ||
+              result.message ||
+              "Login failed. Please try again."
+            );
+          }
+
+          showStatus(
+            "Login successful! Opening your dashboard...",
+            "success"
+          );
+
+          window.location.replace(
+            result.redirect || "/dashboard"
+          );
+
+        } catch (error) {
+
+          console.error("Email login error:", error);
+
+          showStatus(
+            error.message || "Unable to connect to the server.",
+            "error"
+          );
+
+          loginButton.disabled = false;
+          loginButton.textContent = "Login";
+        }
+
+      });
+
+      // GOOGLE OAUTH LOGIN
+
+      googleButton.addEventListener("click", async function() {
+
+        console.log("Google login button clicked.");
+
+        googleButton.disabled = true;
+        googleButton.textContent = "Connecting to Google...";
+
+        showStatus(
+          "Starting Google sign-in...",
+          "info"
+        );
+
+        try {
+
+          const redirectTo =
+            window.location.origin + "/auth/callback";
+
+          const { data, error } =
+            await supabaseClient.auth.signInWithOAuth({
+
+              provider: "google",
+
+              options: {
+                redirectTo: redirectTo,
+                skipBrowserRedirect: true
+              }
+
+            });
+
+          if (error) {
+            throw error;
+          }
+
+          if (!data || !data.url) {
+            throw new Error(
+              "Supabase did not return a Google authorization URL."
+            );
+          }
+
+          showStatus(
+            "Redirecting to Google...",
+            "success"
+          );
+
+          window.location.assign(data.url);
+
+        } catch (error) {
+
+          console.error("Google login error:", error);
+
+          showStatus(
+            "Google login failed: " + error.message,
+            "error"
+          );
+
+          googleButton.disabled = false;
+          googleButton.textContent = "Continue with Google";
+        }
+
+      });
+
+    }
+  </script>
+
+</body>
+</html>

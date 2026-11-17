@@ -1,0 +1,38 @@
+{
+  "name": "server-shelf-cooling",
+  "title": "Server Shelf Cooling System",
+  "board": "esp32",
+  "archetype": "custom",
+  "components": [
+    {
+      "id": "temp_sensor",
+      "type": "dht22",
+      "label": "DHT22 temperature sensor",
+      "purpose": "Measures ambient temperature on the server shelf",
+      "pins": {
+        "data": 4
+      }
+    },
+    {
+      "id": "cooling_relay",
+      "type": "relay",
+      "label": "Relay module - cooling fan",
+      "purpose": "Switches the cooling fan on when temperature is high",
+      "pins": {
+        "control": 5
+      },
+      "print_name": "RELAY"
+    }
+  ],
+  "rules": [
+    {
+      "metric": "temperature",
+      "op": ">",
+      "threshold": 30.0,
+      "unit": "C",
+      "actuator": "cooling_relay"
+    }
+  ],
+  "sampling_interval_s": 2,
+  "schema_version": 2
+}

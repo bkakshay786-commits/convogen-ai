@@ -1,0 +1,35 @@
+{
+  "simulator": "hade-stub-harness (generated MicroPython runs unmodified against stub machine/dht modules)",
+  "run_seconds": 12,
+  "profile": [
+    {
+      "temperature": 27.0,
+      "humidity": 55.0
+    },
+    {
+      "temperature": 33.0,
+      "humidity": 55.0
+    },
+    {
+      "temperature": 27.0,
+      "humidity": 55.0
+    }
+  ],
+  "rules": [
+    {
+      "metric": "temperature",
+      "op": ">",
+      "threshold": 30.0,
+      "unit": "C",
+      "actuator": "cooling_relay"
+    }
+  ],
+  "interval_s": 2,
+  "assertions": [
+    "no traceback in the serial transcript",
+    "HADE_BOOT printed once at startup",
+    "at least 3 structured TEMP:<t> HUM:<h> readings (one per test point)",
+    "RELAY printed state matches the spec rules at every test point",
+    "GPIO 5 pin activity matches the expected RELAY sequence (asserted on pin activity, not prints)"
+  ]
+}

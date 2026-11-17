@@ -1,0 +1,28 @@
+{
+  "simulator": "hade-stub-harness (generated MicroPython runs unmodified against stub machine/dht modules)",
+  "run_seconds": 11,
+  "temperature_profile_c": [
+    27.0,
+    29.5,
+    31.0,
+    33.0,
+    28.0
+  ],
+  "humidity_profile": [
+    55.0,
+    56.0,
+    57.0,
+    58.0,
+    54.0
+  ],
+  "threshold_c": 30.0,
+  "interval_s": 2,
+  "assertions": [
+    "no traceback in the serial transcript",
+    "HADE_BOOT printed once at startup",
+    "at least 4 structured TEMP:<t> HUM:<h> readings",
+    "RELAY:ON printed while temperature above threshold",
+    "RELAY:OFF printed while temperature below threshold",
+    "GPIO 5 actually driven HIGH above threshold and back LOW below it (asserted on pin activity, not prints)"
+  ]
+}

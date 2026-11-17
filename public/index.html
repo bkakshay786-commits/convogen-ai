@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvoGen AI - Register</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #eaf8fa, #f5faff, #e6f5f7);
+            padding: 20px;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            padding: 40px;
+            border-radius: 22px;
+            box-shadow: 0 10px 40px rgba(18, 61, 90, 0.12);
+            text-align: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .brand img {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .brand h1 {
+            color: #123d5a;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .brand span {
+            color: #159eaa;
+        }
+
+        h2 {
+            color: #123d5a;
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            color: #263b50;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #dce5ec;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #16a6ad;
+            box-shadow: 0 0 0 3px rgba(22, 166, 173, 0.12);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #168eae, #19b5a5);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(22, 166, 173, 0.25);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #message {
+            margin-top: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .login-link {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .login-link a {
+            color: #159ca5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 28px;
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 30px 22px;
+            }
+
+            .brand img {
+                width: 55px;
+                height: 55px;
+            }
+
+            .brand h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+<link rel="icon" type="image/webp" href="/convogen-logo.webp">
+</head>
+
+<body>
+
+    <div class="register-container">
+
+        <div class="brand">
+            <img src="/convogen-logo.webp" alt="ConvoGen Logo">
+            <h1>ConvoGen <span>AI</span></h1>
+        </div>
+
+        <h2>Create Account</h2>
+
+        <p class="subtitle">
+            Join ConvoGen AI and start your conversations.
+        </p>
+
+        <form id="registerForm">
+
+            <div class="input-group">
+                <label for="name">Full Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+            </div>
+
+            <button type="submit" id="registerButton">
+                Create Account
+            </button>
+
+        </form>
+
+        <p id="message" role="status" aria-live="polite"></p>
+
+        <p class="login-link">
+            Already have an account?
+            <a href="/login">Sign In</a>
+        </p>
+
+        <p class="footer">
+            © 2026 ConvoGen AI. All rights reserved.
+        </p>
+
+    </div>
+
+    <script>
+        "use strict";
+
+        const form = document.getElementById("registerForm");
+        const message = document.getElementById("message");
+        const button = document.getElementById("registerButton");
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.style.color =
+                type === "success" ? "#16803c" : "#d93025";
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            if (!name) {
+                showMessage("Please enter your full name.", "error");
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage(
+                    "Password must contain at least 8 characters.",
+                    "error"
+                );
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage("Passwords do not match!", "error");
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Creating Account...";
+            message.textContent = "";
+
+            try {
+                const response = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        name,
+                        email,
+                        password,
+                        confirmPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || "Registration failed. Please try again."
+                    );
+                }
+
+                if (result.redirect) {
+                    showMessage(
+                        result.message || "Account created successfully!",
+                        "success"
+                    );
+
+                    window.location.assign(result.redirect);
+                    return;
+                }
+
+                showMessage(
+                    result.message ||
+                    "Registration successful! Check your email for verification.",
+                    "success"
+                );
+
+                form.reset();
+
+            } catch (error) {
+                showMessage(
+                    error.message || "Unable to connect to the server.",
+                    "error"
+                );
+            } finally {
+                button.disabled = false;
+                button.textContent = "Create Account";
+            }
+        });
+    </script>
+
+</body>
+</html>

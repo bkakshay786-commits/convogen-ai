@@ -1,0 +1,34 @@
+{
+  "project": "dht22-relay-control",
+  "engine_version": "2.1",
+  "generated_at": "2026-11-10T23:18:51",
+  "board": "ESP32 development board (3.3V logic)",
+  "user_requirement": "Turn on a relay when my room gets hotter than 30 degrees, using a DHT22 sensor on an ESP32.",
+  "effective_requirement": "Poll a DHT22 sensor on GPIO 4 every 2 seconds. If the temperature climbs above 30 C, switch the relay on GPIO 5 ON; otherwise switch it OFF. Print the readings and the relay state via the serial terminal.",
+  "components": [
+    {
+      "name": "DHT22 temperature/humidity sensor",
+      "role": "sensor",
+      "connection": {
+        "data_pin": 4
+      },
+      "notes": "10k pull-up between DATA and 3V3; call measure() before temperature()/humidity()"
+    },
+    {
+      "name": "Relay module (1-channel, active-HIGH)",
+      "role": "actuator",
+      "connection": {
+        "control_pin": 5
+      },
+      "notes": "value(1) = ON, value(0) = OFF"
+    }
+  ],
+  "parameters": {
+    "threshold_c": 30.0,
+    "interval_s": 2
+  },
+  "validation": {
+    "firmware": "digitally_validated",
+    "physically_verified": false
+  }
+}

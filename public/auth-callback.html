@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Sign-in | ConvoGen AI</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #eff8fc;
+      color: #12344a;
+    }
+
+    main {
+      width: 100%;
+      max-width: 460px;
+      padding: 45px 30px;
+      text-align: center;
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 15px 55px rgba(0, 35, 60, .12);
+    }
+
+    .logo {
+      display: block;
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      border-radius: 14px;
+      margin: 0 auto 10px;
+    }
+
+    #message {
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+      color: #159b82;
+    }
+
+    #message.error {
+      color: #d82020;
+    }
+  </style>
+<link rel="icon" type="image/webp" href="/convogen-logo.webp">
+</head>
+
+<body>
+  <main>
+    <img class="logo" src="/convogen-logo.webp" alt="ConvoGen AI logo">
+    <h1>ConvoGen AI</h1>
+    <p>Completing your Google sign-in...</p>
+    <p id="message">Please wait.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    async function completeGoogleLogin() {
+      const message = document.getElementById("message");
+
+      function fail(error) {
+        console.error("Google callback error:", error);
+        message.className = "error";
+        message.textContent = error.message || "Google sign-in failed.";
+      }
+
+      try {
+        if (!window.supabase) {
+          throw new Error("Supabase library did not load. Refresh the page.");
+        }
+
+        const SUPABASE_URL =
+          "https://rzeqerwqexhwapicubxz.supabase.co";
+
+        const SUPABASE_PUBLISHABLE_KEY =
+          "sb_publishable__O418iD2yMy6aFdDBrgj4g_-5_-clD0";
+
+        if (
+          !SUPABASE_PUBLISHABLE_KEY ||
+          SUPABASE_PUBLISHABLE_KEY === "YOUR_ACTUAL_SUPABASE_PUBLISHABLE_KEY"
+        ) {
+          throw new Error("Add your Supabase publishable key to this page.");
+        }
+
+        const client = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_PUBLISHABLE_KEY,
+          {
+            auth: {
+              flowType: "pkce",
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: false
+            }
+          }
+        );
+
+        const currentUrl = new URL(window.location.href);
+
+        const oauthError =
+          currentUrl.searchParams.get("error_description") ||
+          currentUrl.searchParams.get("error");
+
+        if (oauthError) {
+          throw new Error(oauthError);
+        }
+
+        const code = currentUrl.searchParams.get("code");
+
+        if (!code) {
+          console.error("Callback query:", window.location.search);
+          console.error("Callback hash:", window.location.hash);
+
+          throw new Error(
+            "No Google authorization code was received. Check the Supabase redirect URL configuration."
+          );
+        }
+
+        message.textContent = "Verifying your Google account...";
+
+        const { data, error } =
+          await client.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data.session) {
+          throw new Error("Supabase did not return a valid session.");
+        }
+
+        message.textContent = "Establishing your ConvoGen session...";
+
+        const response = await fetch("/auth/session", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token
+          })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            result.error || result.message || "The server rejected the login session."
+          );
+        }
+
+        // Server cookies have been set. Clear ONLY the browser's local
+        // copy of the session. Do NOT call client.auth.signOut() here:
+        // even with scope "local" it revokes this session on Supabase's
+        // server, which kills the session the server just stored in the
+        // cookies and bounces /dashboard straight back to /login.
+        try {
+          client.auth.stopAutoRefresh();
+          Object.keys(window.localStorage)
+            .filter((key) => key.startsWith("sb-"))
+            .forEach((key) => window.localStorage.removeItem(key));
+        } catch {
+          // Local cleanup is best-effort; the server cookies are what matter.
+        }
+
+        message.textContent = "Login successful. Opening your dashboard...";
+
+        window.location.replace("/dashboard");
+
+      } catch (error) {
+        fail(error);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", completeGoogleLogin);
+  </script>
+</body>
+</html>

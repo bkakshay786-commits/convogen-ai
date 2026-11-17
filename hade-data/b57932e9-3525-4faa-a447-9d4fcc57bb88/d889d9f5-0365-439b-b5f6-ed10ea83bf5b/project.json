@@ -1,0 +1,50 @@
+{
+  "name": "smart-greenhouse-system",
+  "title": "Smart Greenhouse System",
+  "board": "esp32",
+  "components": [
+    {
+      "id": "sensor1",
+      "type": "dht22",
+      "label": "DHT22 temperature/humidity sensor",
+      "pins": {
+        "data": 4
+      }
+    },
+    {
+      "id": "fan",
+      "type": "relay",
+      "label": "Relay module - ventilation fan",
+      "pins": {
+        "control": 5
+      },
+      "print_name": "RELAY"
+    },
+    {
+      "id": "alarm",
+      "type": "led",
+      "label": "LED - low-humidity alarm",
+      "pins": {
+        "control": 18
+      },
+      "print_name": "LED"
+    }
+  ],
+  "rules": [
+    {
+      "metric": "temperature",
+      "op": ">",
+      "threshold": 32.0,
+      "unit": "C",
+      "actuator": "fan"
+    },
+    {
+      "metric": "humidity",
+      "op": "<",
+      "threshold": 40.0,
+      "unit": "%",
+      "actuator": "alarm"
+    }
+  ],
+  "sampling_interval_s": 2
+}

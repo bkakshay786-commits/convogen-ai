@@ -1,0 +1,42 @@
+{
+  "project": "smart-greenhouse-system",
+  "engine_version": "3.0",
+  "generated_at": "2026-11-11T00:05:08",
+  "board": "ESP32 development board (3.3V logic)",
+  "user_requirement": "Create a smart greenhouse system using ESP32.\n\nUse a DHT22 sensor to monitor temperature and humidity.\n\nAutomatically turn ON a ventilation fan when temperature exceeds 32\u00b0C and turn it OFF when temperature is 32\u00b0C or below.\n\nTurn ON a red LED alarm when humidity falls below 40% and turn it OFF when humidity reaches 40% or above.\n\nUse a 2-second sampling interval.\n\nAutomatically select supported components, assign valid GPIO pins, generate firmware, independently generate behavioral tests, simulate the firmware, validate serial output and actual GPIO activity, and export the complete project ZIP.",
+  "spec_file": "project.json",
+  "components": [
+    {
+      "name": "DHT22 temperature/humidity sensor",
+      "role": "sensor",
+      "connection": {
+        "data_pin": 4
+      },
+      "notes": "10k pull-up between DATA and 3V3; call measure() before temperature()/humidity()"
+    },
+    {
+      "name": "Relay module - ventilation fan",
+      "role": "actuator",
+      "connection": {
+        "control_pin": 5
+      },
+      "notes": "value(1) = ON, value(0) = OFF (active-HIGH); state printed as RELAY:ON/OFF"
+    },
+    {
+      "name": "LED - low-humidity alarm",
+      "role": "actuator",
+      "connection": {
+        "control_pin": 18
+      },
+      "notes": "value(1) = lit; 220 ohm series resistor; state printed as LED:ON/OFF"
+    }
+  ],
+  "parameters": {
+    "threshold_c": 32.0,
+    "interval_s": 2
+  },
+  "validation": {
+    "firmware": "digitally_validated",
+    "physically_verified": false
+  }
+}
