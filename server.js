@@ -5729,7 +5729,7 @@ const server = app.listen(PORT, () => {
   console.log("======================================");
   console.log(`Environment: ${NODE_ENV}`);
   console.log(`Server:      http://localhost:${PORT}`);
-  console.log("Build tag:   mobile-2");
+  console.log("Build tag:   smart-1");
   console.log("OCR:         Enabled");
   console.log(`PDF pages:   Maximum ${MAX_PDF_PAGES}`);
   console.log(`File limit:  ${MAX_FILES} files`);

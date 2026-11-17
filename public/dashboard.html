@@ -3124,43 +3124,9 @@ body.dark .modal-sub, body.dark .modal-note { color: #a6aec2; }
                     </div>
                     </span>
 
-                    <button
-                        class="web-search-btn"
-                        id="webSearchBtn"
-                        type="button"
-                        title="Search the web for up-to-date information"
-                        aria-pressed="false"
-                    >
-                        <i data-lucide="globe"></i>
-                        <span>Web</span>
-                    </button>
-
-                    <button
-                        class="web-search-btn"
-                        id="imageModeBtn"
-                        type="button"
-                        title="Generate an image, or edit an attached image (via Pollinations)"
-                        aria-pressed="false"
-                    >
-                        <i data-lucide="image"></i>
-                        <span>Image</span>
-                    </button>
-
-                    <button
-                        class="web-search-btn"
-                        id="editModeBtn"
-                        type="button"
-                        title="Edit an attached document (PDF, Word, text)"
-                        aria-pressed="false"
-                    >
-                        <i data-lucide="file-pen"></i>
-                        <span>Edit file</span>
-                    </button>
-
                     <select id="modelSelect" aria-label="Choose AI model" style="display:none">
                         <option value="">Loading models...</option>
                     </select>
-                    <span class="auto-badge" title="ConvoGen picks the best model for each prompt" style="font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);opacity:.85;white-space:nowrap">✦ Auto</span>
 
                     <textarea
                         id="messageInput"
@@ -3299,9 +3265,6 @@ const cameraCancelBtn =
     document.getElementById("cameraCancelBtn");
 const cameraFallbackBtn =
     document.getElementById("cameraFallbackBtn");
-const webSearchBtn = document.getElementById("webSearchBtn");
-const imageModeBtn = document.getElementById("imageModeBtn");
-const editModeBtn = document.getElementById("editModeBtn");
 const micBtn = document.getElementById("micBtn");
 const attachmentPreview = document.getElementById("attachmentPreview");
 
@@ -3310,9 +3273,9 @@ let currentConversationId = null;
 let isSending = false;
 let toastTimeout = null;
 let selectedFiles = [];
+// Set per message by the smart router in sendMessage:
+// true when the prompt asks for current information.
 let webSearchEnabled = false;
-let imageModeEnabled = false;
-let editModeEnabled = false;
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -4234,9 +4197,13 @@ async function openCamera() {
         !navigator.mediaDevices ||
         !navigator.mediaDevices.getUserMedia
     ) {
-        // Very old browser, or the page is not in a secure
+        // Very old browser, an in-app browser (Gmail,
+        // WhatsApp), or the page is not in a secure
         // context: fall back to the capture input, which
         // opens the camera app on mobile.
+        showToast(
+            "Live camera isn't available in this browser view, so pick a photo instead. It works when the site is opened in the Chrome app."
+        );
         cameraInput.click();
         return;
     }
@@ -4263,7 +4230,7 @@ async function openCamera() {
         cameraError.textContent =
             "The camera could not be opened (" +
             (error.name || "error") +
-            "). Check the browser's camera permission for this site, or pick a photo from your files instead.";
+            "). Check the browser's camera permission for this site, or pick a photo from your files instead. If you opened this site from inside another app (like Gmail or WhatsApp), open it in the Chrome browser - in-app browsers block the camera.";
         cameraError.hidden = false;
         cameraCaptureBtn.hidden = true;
         cameraVideo.hidden = true;
@@ -4365,7 +4332,7 @@ function stopVoiceInput() {
     }
 }
 
-function toggleVoiceInput() {
+async function toggleVoiceInput() {
     if (!SpeechRecognitionCtor) {
         showToast(
             "Voice input isn't supported in this browser. Chrome or Edge can do it."
@@ -4375,6 +4342,28 @@ function toggleVoiceInput() {
 
     if (voiceListening) {
         stopVoiceInput();
+        return;
+    }
+
+    // Ask for the microphone explicitly first, so the
+    // browser shows its permission prompt and a denial
+    // gives a clear message instead of a silent failure.
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast(
+            "Voice input needs the Chrome browser. If you opened this site from inside another app (like Gmail or WhatsApp), open it in Chrome and try again."
+        );
+        return;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+        });
+        stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+        showToast(
+            "Microphone permission is needed for voice input. Allow it when the browser asks (or in the browser's site settings), then tap the mic again."
+        );
         return;
     }
 
@@ -4412,6 +4401,10 @@ function toggleVoiceInput() {
         } else if (event.error === "no-speech") {
             showToast(
                 "I didn't hear anything - tap the mic and try again."
+            );
+        } else if (event.error === "network") {
+            showToast(
+                "The speech service could not be reached. Check your internet connection - and if you opened this site inside another app, open it in the Chrome app instead."
             );
         } else if (event.error !== "aborted") {
             showToast("Voice input stopped (" + event.error + ").");
@@ -5243,6 +5236,82 @@ sendBtn.addEventListener("click", event => {
 
 /* SEND MESSAGE WITH ATTACHMENTS */
 
+/* SMART ROUTING - there are no mode buttons any more.
+   Each message is classified from its wording and its
+   attachments and routed to chat, web search, image
+   generation/editing or file editing. The rules are
+   deliberately conservative: a special action is chosen
+   only on clear wording, otherwise the message stays a
+   normal chat (which can still read the attachments). */
+
+function detectSmartAction(text, files) {
+    const t = " " + String(text || "").toLowerCase() + " ";
+    const list = files || [];
+    const images = list.filter(file =>
+        (file.type || "").startsWith("image/")
+    );
+    const docs = list.filter(file =>
+        !(file.type || "").startsWith("image/")
+    );
+
+    const editWords =
+        /\b(remove|delete|change|replace|edit|fix|correct|rewrite|reword|rename|insert|update|modify|erase|translate|add)\b/;
+
+    // One document + a clear edit instruction = file edit.
+    if (docs.length === 1 && images.length === 0 && editWords.test(t)) {
+        return "file-edit";
+    }
+
+    // A photo + a clear change request = image edit.
+    const styleWords =
+        /\b(cartoon|anime|painting|sketch|drawing|version|style|sunset|vintage)\b/;
+
+    if (
+        images.length > 0 &&
+        (editWords.test(t) || styleWords.test(t))
+    ) {
+        return "image-edit";
+    }
+
+    // No attachments + a clear "make me a picture" ask =
+    // image generation.
+    const makeWords =
+        /\b(generate|create|make|draw|paint|design|render)\b/;
+    const pictureWords =
+        /\b(image|picture|photo|drawing|painting|illustration|art|poster|logo|wallpaper|sketch|diagram)\b/;
+
+    if (
+        list.length === 0 &&
+        makeWords.test(t) &&
+        pictureWords.test(t)
+    ) {
+        return "image";
+    }
+
+    if (
+        list.length === 0 &&
+        /\b(image|picture|photo|drawing|painting)\s+of\b/.test(t)
+    ) {
+        return "image";
+    }
+
+    return "chat";
+}
+
+function wantsWebSearch(text) {
+    const t = " " + String(text || "").toLowerCase() + " ";
+
+    if (
+        /\b(search|google|browse|look up|check online|find online)\b/
+            .test(t)
+    ) {
+        return true;
+    }
+
+    return /\b(latest|today|tonight|yesterday|current|currently|recent|recently|news|weather|score|price|prices)\b/
+        .test(t);
+}
+
 async function sendMessage(value) {
     if (isSending) {
         return;
@@ -5265,15 +5334,19 @@ async function sendMessage(value) {
         stopVoiceInput();
     }
 
-    if (editModeEnabled) {
+    const smartAction = detectSmartAction(message, selectedFiles);
+
+    if (smartAction === "file-edit") {
         await editFileMessage(message);
         return;
     }
 
-    if (imageModeEnabled) {
+    if (smartAction === "image" || smartAction === "image-edit") {
         await generateImageMessage(message);
         return;
     }
+
+    webSearchEnabled = wantsWebSearch(message);
 
     if (!modelSelect.value) {
         showToast("Please select an available AI model.");
@@ -5284,10 +5357,8 @@ async function sendMessage(value) {
 
     sendBtn.disabled = true;
     attachBtn.disabled = true;
-    webSearchBtn.disabled = true;
     fileInput.disabled = true;
     messageInput.disabled = true;
-    editModeBtn.disabled = true;
     modelSelect.disabled = true;
 
     let userMessageDisplayed = false;
@@ -5449,10 +5520,8 @@ async function sendMessage(value) {
 
         sendBtn.disabled = false;
         attachBtn.disabled = false;
-        webSearchBtn.disabled = false;
         fileInput.disabled = false;
         messageInput.disabled = false;
-        editModeBtn.disabled = false;
         modelSelect.disabled = modelSelect.options.length === 0;
 
         messageInput.focus();
@@ -5484,7 +5553,7 @@ async function editFileMessage(message) {
     }
 
     if (selectedFiles.length > 1) {
-        showToast("Edit mode works on one file at a time.");
+        showToast("File editing works on one file at a time.");
         return;
     }
 
@@ -5495,7 +5564,7 @@ async function editFileMessage(message) {
 
     if (!EDITABLE_EXTENSIONS.includes(extension)) {
         showToast(
-            "That file can't be edited here. Use a PDF, DOCX, TXT, MD, CSV or JSON file - photos are edited in Image mode."
+            "That file can't be edited here. Use a PDF, DOCX, TXT, MD, CSV or JSON file. For a photo, attach it and describe the change you want."
         );
         return;
     }
@@ -5511,9 +5580,6 @@ async function editFileMessage(message) {
 
     sendBtn.disabled = true;
     attachBtn.disabled = true;
-    webSearchBtn.disabled = true;
-    imageModeBtn.disabled = true;
-    editModeBtn.disabled = true;
     fileInput.disabled = true;
     messageInput.disabled = true;
 
@@ -5590,9 +5656,6 @@ async function editFileMessage(message) {
 
         sendBtn.disabled = false;
         attachBtn.disabled = false;
-        webSearchBtn.disabled = false;
-        imageModeBtn.disabled = false;
-        editModeBtn.disabled = false;
         fileInput.disabled = false;
         messageInput.disabled = false;
 
@@ -5607,14 +5670,14 @@ async function generateImageMessage(message) {
 
     if (selectedFiles.length > 0 && imageFiles.length === 0) {
         showToast(
-            "Image mode generates pictures or edits an attached image. Other files need normal chat mode."
+            "I can generate or edit pictures, but one of the attached files is not an image. Remove it and try again."
         );
         return;
     }
 
     if (selectedFiles.length > imageFiles.length) {
         showToast(
-            "Image mode can only use image files. Remove the other attachments first."
+            "Only image files can be used for pictures. Remove the other attachments first."
         );
         return;
     }
@@ -5641,9 +5704,6 @@ async function generateImageMessage(message) {
 
     sendBtn.disabled = true;
     attachBtn.disabled = true;
-    webSearchBtn.disabled = true;
-    imageModeBtn.disabled = true;
-    editModeBtn.disabled = true;
     fileInput.disabled = true;
     messageInput.disabled = true;
 
@@ -5748,9 +5808,6 @@ async function generateImageMessage(message) {
 
         sendBtn.disabled = false;
         attachBtn.disabled = false;
-        webSearchBtn.disabled = false;
-        imageModeBtn.disabled = false;
-        editModeBtn.disabled = false;
         fileInput.disabled = false;
         messageInput.disabled = false;
 
@@ -5759,87 +5816,6 @@ async function generateImageMessage(message) {
 }
 
 /* EVENT LISTENERS */
-
-webSearchBtn.addEventListener("click", () => {
-    webSearchEnabled = !webSearchEnabled;
-    webSearchBtn.classList.toggle("active", webSearchEnabled);
-    webSearchBtn.setAttribute("aria-pressed", String(webSearchEnabled));
-
-    if (webSearchEnabled && imageModeEnabled) {
-        imageModeEnabled = false;
-        imageModeBtn.classList.remove("active");
-        imageModeBtn.setAttribute("aria-pressed", "false");
-        messageInput.placeholder = "Ask anything...";
-    }
-
-    if (webSearchEnabled && editModeEnabled) {
-        editModeEnabled = false;
-        editModeBtn.classList.remove("active");
-        editModeBtn.setAttribute("aria-pressed", "false");
-    }
-
-    showToast(
-        webSearchEnabled
-            ? "Web search is ON for your next message."
-            : "Web search is OFF."
-    );
-});
-
-imageModeBtn.addEventListener("click", () => {
-    imageModeEnabled = !imageModeEnabled;
-    imageModeBtn.classList.toggle("active", imageModeEnabled);
-    imageModeBtn.setAttribute("aria-pressed", String(imageModeEnabled));
-
-    if (imageModeEnabled && webSearchEnabled) {
-        webSearchEnabled = false;
-        webSearchBtn.classList.remove("active");
-        webSearchBtn.setAttribute("aria-pressed", "false");
-    }
-
-    if (imageModeEnabled && editModeEnabled) {
-        editModeEnabled = false;
-        editModeBtn.classList.remove("active");
-        editModeBtn.setAttribute("aria-pressed", "false");
-    }
-
-    messageInput.placeholder = imageModeEnabled
-        ? "Describe an image, or an edit to an attached photo..."
-        : "Ask anything...";
-
-    showToast(
-        imageModeEnabled
-            ? "Image mode is ON — describe a picture to generate it, or attach a photo and describe the edit."
-            : "Image mode is OFF."
-    );
-});
-
-editModeBtn.addEventListener("click", () => {
-    editModeEnabled = !editModeEnabled;
-    editModeBtn.classList.toggle("active", editModeEnabled);
-    editModeBtn.setAttribute("aria-pressed", String(editModeEnabled));
-
-    if (editModeEnabled && webSearchEnabled) {
-        webSearchEnabled = false;
-        webSearchBtn.classList.remove("active");
-        webSearchBtn.setAttribute("aria-pressed", "false");
-    }
-
-    if (editModeEnabled && imageModeEnabled) {
-        imageModeEnabled = false;
-        imageModeBtn.classList.remove("active");
-        imageModeBtn.setAttribute("aria-pressed", "false");
-    }
-
-    messageInput.placeholder = editModeEnabled
-        ? "Describe the edit, with the document attached..."
-        : "Ask anything...";
-
-    showToast(
-        editModeEnabled
-            ? "Edit mode is ON - attach one document (PDF, Word or text) and describe the change."
-            : "Edit mode is OFF."
-    );
-});
 
 chatForm.addEventListener("submit", event => {
     event.preventDefault();
